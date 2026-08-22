@@ -121,16 +121,15 @@ export const main = sdk.setupMain(async ({ effects }) => {
     'main',
   )
 
-  /*
-   * StarOS-specific: fix /dev/dri permissions
-   * StartOS passes DRI devices as root:root, preventing the container user from
-   * opening them. chmod o+rw so selkies can use hardware acceleration.
-   */
-  await subcontainer.exec([
-    'sh',
-    '-c',
-    'ls /dev/dri/* 2>/dev/null | xargs -r chmod o+rw',
-  ])
+  if (!conf.forceSoftwareRendering) {
+    // StartOS binds DRI devices into the container as root:root, so the
+    // unprivileged desktop user cannot open them without this.
+    await subcontainer.exec([
+      'sh',
+      '-c',
+      'ls /dev/dri/* 2>/dev/null | xargs -r chmod o+rw',
+    ])
+  }
 
   /*
    * Sparrow settings
@@ -253,6 +252,12 @@ export const main = sdk.setupMain(async ({ effects }) => {
   /*
    * Daemons
    */
+  // The X11 applications in this image do not render when both the outer
+  // compositor and Labwc use their software Wayland paths. Force Software
+  // Rendering therefore takes precedence over the stored Wayland preference
+  // and selects the validated CPU-only X11 path instead.
+  const enableWayland = conf.enableWayland && !conf.forceSoftwareRendering
+
   const primaryDaemon = sdk.Daemons.of(effects).addDaemon('primary', {
     subcontainer: subcontainer,
     exec: {
@@ -265,6 +270,16 @@ export const main = sdk.setupMain(async ({ effects }) => {
         TITLE: conf.title,
         CUSTOM_USER: conf.username,
         PASSWORD: conf.password,
+        PIXELFLUX_WAYLAND: enableWayland ? 'true' : 'false',
+        ...(conf.forceSoftwareRendering
+          ? {
+              AUTO_GPU: 'false',
+              SELKIES_USE_CPU: 'true|locked',
+              DISABLE_DRI3: 'true',
+              DISABLE_ZINK: 'true',
+              LIBGL_ALWAYS_SOFTWARE: 'true',
+            }
+          : {}),
       },
     },
     ready: {
