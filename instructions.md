@@ -6,9 +6,9 @@ Welcome to Sparrow on Webtop, your favourite desktop wallet in an Immutable Linu
 
 The initial configuration of Sparrow is straightforward. You have two options:
 
-1. **Go with the Defaults**: If you prefer simplicity, you can use the default settings for `Webtop title`, `Username` and `Password`. Simply click save and start the service.
+1. **Go with the Defaults**: If you prefer simplicity, you can use the default settings for `Webtop title`, `Username`, `Password`, and rendering. Simply click save and start the service.
 
-2. **Customize Settings**: If you want to personalize your Webtop experience, you can customize the `Webtop title`, `Username` and `Password` to your liking. After making your changes, click save and start the service.
+2. **Customize Settings**: If you want to personalize your Webtop experience, you can customize the `Webtop title`, `Username`, `Password`, and rendering options to your liking. After making your changes, click save and start the service.
 
 Now your Sparrow on Webtop is ready to be visited in your browser!
 
@@ -27,6 +27,10 @@ Now your Sparrow on Webtop is ready to be visited in your browser!
 6. You can run a text editor, file manager, terminal or a second instance of Sparrow by right-clicking the desktop. Sparrow opens maximized; double-click its title bar to reveal the desktop.
 
 7. Sparrow on Webtop does not support cameras or USB devices. Keep this in mind when setting up wallets.
+
+8. Leave **Enable Wayland** on and **Force Software Rendering** off for normal hardware-accelerated operation. You can turn **Enable Wayland** off to use the older X11 desktop backend while retaining normal graphics-device detection.
+
+9. If the Web UI stays blank, flickers, or crashes because the server or virtual machine exposes incompatible graphics hardware, turn **Force Software Rendering** on and restart the service. It takes precedence over **Enable Wayland** and uses the slower CPU-only X11 compatibility path. It does not change Sparrow's wallet or server settings.
 
 ## Control Panel
 

@@ -29,7 +29,11 @@ const dict = {
   'Sparrow settings': 302,
   'Bitcoin/Electrum Server': 303,
   'Proxy settings': 304,
-  'Webtop username/password and connection settings': 305,
+  'Webtop username/password, rendering, and connection settings': 305,
+  'Enable Wayland': 306,
+  'Use the Wayland desktop backend. Disable this for the older X11 compatibility backend. Force Software Rendering takes precedence and uses X11.': 307,
+  'Force Software Rendering': 308,
+  'Use the CPU-only X11 compatibility path without graphics devices. Enable this if the Web UI is blank or unstable because of incompatible graphics hardware. This overrides Enable Wayland, is slower, and takes effect after restart.': 309,
 
   // manifest/index.ts
   'Used to connect to your Bitcoin node.': 400,

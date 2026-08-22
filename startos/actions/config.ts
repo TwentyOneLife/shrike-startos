@@ -1,6 +1,7 @@
 import { sdk } from '../sdk'
 import { T, utils } from '@start9labs/start-sdk'
 import { createDefaultStore, store } from '../fileModels/store.yaml'
+import { i18n } from '../i18n'
 
 const { InputSpec, Value, Variants } = sdk
 
@@ -35,6 +36,20 @@ export const inputSpec = InputSpec.of({
     placeholder: '',
     masked: true,
     minLength: 8,
+  }),
+  enableWayland: Value.toggle({
+    name: i18n('Enable Wayland'),
+    description: i18n(
+      'Use the Wayland desktop backend. Disable this for the older X11 compatibility backend. Force Software Rendering takes precedence and uses X11.',
+    ),
+    default: true,
+  }),
+  forceSoftwareRendering: Value.toggle({
+    name: i18n('Force Software Rendering'),
+    description: i18n(
+      'Use the CPU-only X11 compatibility path without graphics devices. Enable this if the Web UI is blank or unstable because of incompatible graphics hardware. This overrides Enable Wayland, is slower, and takes effect after restart.',
+    ),
+    default: false,
   }),
   sparrow: Value.object(
     {
@@ -152,7 +167,9 @@ export const config = sdk.Action.withInput(
   // metadata
   async ({ effects }) => ({
     name: 'Settings',
-    description: 'Webtop username/password and connection settings',
+    description: i18n(
+      'Webtop username/password, rendering, and connection settings',
+    ),
     warning: null,
     allowedStatuses: 'any',
     group: 'Configuration',
@@ -183,6 +200,8 @@ async function readSettings(effects: T.Effects): Promise<PartialInputSpec> {
     title: settings.title,
     username: settings.username,
     password: settings.password,
+    enableWayland: settings.enableWayland,
+    forceSoftwareRendering: settings.forceSoftwareRendering,
     sparrow: {
       managesettings: settings.sparrow.managesettings,
       server: {
@@ -205,6 +224,8 @@ async function writeSettings(effects: T.Effects, input: InputSpec) {
     title: input.title,
     username: input.username,
     password: input.password,
+    enableWayland: input.enableWayland,
+    forceSoftwareRendering: input.forceSoftwareRendering,
     sparrow: {
       managesettings: input.sparrow.managesettings,
       server: {
