@@ -7,7 +7,7 @@
 > **Upstream docs:** <https://sparrowwallet.com/docs/>
 >
 > Everything not listed in this document should behave the same as upstream
-> Sparrow 2.5.3. If a feature, setting, or behavior is not mentioned here,
+> Sparrow 2.5.4. If a feature, setting, or behavior is not mentioned here,
 > the upstream documentation is accurate and fully applicable.
 
 [Sparrow Wallet](https://sparrowwallet.com/) is a feature-rich Bitcoin desktop wallet focused on security and privacy. This package runs Sparrow inside a lightweight [Webtop](https://docs.linuxserver.io/images/docker-webtop/) Linux desktop environment, making it accessible directly from any web browser — no local software installation required.
@@ -36,8 +36,8 @@ Wrapper repo: <https://github.com/remcoros/sparrow-webtop-startos>
 
 ## Image and Container Runtime
 
-- **Image:** `ghcr.io/remcoros/sparrow-webtop:2.5.3.1` (custom image based on [LinuxServer's Selkies base image](https://github.com/linuxserver/docker-baseimage-selkies))
-- **Architectures:** x86_64, aarch64 (aarch64 emulated via x86_64 image)
+- **Image:** `ghcr.io/remcoros/sparrow-webtop:2.5.4` (custom image based on [LinuxServer's Selkies base image](https://github.com/linuxserver/docker-baseimage-selkies))
+- **Architectures:** x86_64, aarch64 (native image for each architecture)
 - **Entrypoint:** Custom `docker_entrypoint.sh` (mounted from assets at runtime) wraps the upstream entrypoint. It sets the browser tab title, handles reconnect behavior, and starts `socat` proxies for local Bitcoin/Electrum connections.
 
 The manifest enables hardware acceleration, so StartOS binds the graphics device nodes exposed by the host into the container. **Enable Wayland** selects the modern Wayland backend and defaults to on; turning it off selects the older X11 backend without disabling normal graphics-device detection. **Force Software Rendering** is the compatibility override for blank, unstable, or crashing Web UIs caused by incompatible graphics hardware. It takes precedence over **Enable Wayland**, selects X11, disables DRI3/Zink application acceleration and automatic GPU selection, forces Mesa software rendering, and locks Selkies to CPU video encoding.
@@ -182,8 +182,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for environment setup and build instructi
 
 ```yaml
 package_id: sparrow-webtop
-upstream_version: '2.5.3'
-image: ghcr.io/remcoros/sparrow-webtop:2.5.3.1
+upstream_version: '2.5.4'
+image: ghcr.io/remcoros/sparrow-webtop:2.5.4
 architectures:
   - x86_64
   - aarch64
