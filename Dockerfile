@@ -77,9 +77,16 @@ RUN \
   echo "**** install Shrike ****" && \
   # the .deb's postinst runs xdg-desktop-menu, which needs this to exist
   mkdir -p /usr/share/desktop-directories/ && \
+  # The SDK names architectures as the kernel does and Debian packages name them as Debian does,
+  # so x86_64 has to become amd64 here or the download is a 404.
+  case "${ARCH}" in \
+    x86_64|amd64) DEB_ARCH=amd64 ;; \
+    aarch64|arm64) DEB_ARCH=arm64 ;; \
+    *) echo "unsupported architecture: ${ARCH}" && exit 1 ;; \
+  esac && \
   cd /tmp && \
   BASE=https://github.com/privkeyio/shrike/releases/download/${SHRIKE_VERSION} && \
-  wget --quiet ${BASE}/shrike_${SHRIKE_DEBVERSION}_${ARCH}.deb \
+  wget --quiet ${BASE}/shrike_${SHRIKE_DEBVERSION}_${DEB_ARCH}.deb \
                ${BASE}/SHA256SUMS \
                ${BASE}/SHA256SUMS.asc && \
   gpg --import /tmp/shrike-signing-key.asc && \
@@ -89,7 +96,7 @@ RUN \
       | grep -q "^\[GNUPG:\] VALIDSIG ${SHRIKE_PGP_FINGERPRINT} " || exit 1 && \
   sha256sum --check --ignore-missing SHA256SUMS || exit 1 && \
   DEBIAN_FRONTEND=noninteractive \
-  apt-get install -y ./shrike_${SHRIKE_DEBVERSION}_${ARCH}.deb && \
+  apt-get install -y ./shrike_${SHRIKE_DEBVERSION}_${DEB_ARCH}.deb && \
   rm -f /tmp/shrike* /tmp/SHA256SUMS*
 
 FROM scratch
