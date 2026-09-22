@@ -1,0 +1,7 @@
+# Compositing is cosmetic and unnecessary when Mesa is explicitly forced to
+# software rendering.
+if [ "${LIBGL_ALWAYS_SOFTWARE}" != "true" ]; then
+  compton -b
+fi
+
+/opt/shrike/bin/Shrike
