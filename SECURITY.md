@@ -4,9 +4,9 @@
 
 Do not disclose suspected security vulnerabilities through public issues, pull requests, discussions, or other public channels.
 
-Report vulnerabilities in this StartOS package using [GitHub private vulnerability reporting](https://github.com/remcoros/sparrow-webtop-startos/security/advisories/new).
+Report vulnerabilities in this StartOS package using [GitHub private vulnerability reporting](https://github.com/TwentyOneLife/shrike-startos/security/advisories/new).
 
-For bugs with no security or privacy impact, open a [regular GitHub issue](https://github.com/remcoros/sparrow-webtop-startos/issues/new/choose).
+For bugs with no security or privacy impact, open a [regular GitHub issue](https://github.com/TwentyOneLife/shrike-startos/issues/new/choose).
 
 Email reports are not monitored.
 

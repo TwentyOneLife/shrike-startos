@@ -1,5 +1,5 @@
 {
-  "name": "sparrow-webtop",
+  "name": "shrike-startos",
   "scripts": {
     "build": "rm -rf ./javascript && ncc build startos/index.ts -o ./javascript",
     "prettier": "prettier --write startos",
@@ -7,12 +7,8 @@
   },
   "dependencies": {
     "@start9labs/start-sdk": "2.0.9",
-    "bitcoin-core-startos": "github:Start9Labs/bitcoin-core-startos#31.x",
-    "electrs-startos": "github:start9-community/electrs-startos#master",
-    "frigate-startos": "github:remcoros/frigate-startos#main",
-    "fulcrum-startos": "github:Start9Labs/fulcrum-startos#master",
     "js-yaml": "^4.1.1",
-    "tor-startos": "github:Start9Labs/tor-startos#master"
+    "tor-startos": "github:Start9Labs/tor-startos#801070530453e73f143bfce2fcfb27988b962f03"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",

@@ -1,43 +1,49 @@
-# Sparrow Instructions
+# Shrike
 
-Welcome to Sparrow on Webtop, your favourite desktop wallet in an Immutable Linux Desktop, running 24/7 on your StartOS server!
+Shrike is a wallet for the Bitcoin Blake2b chain, a fork of Sparrow. This package runs it on your
+server and shows it in your browser, connected to your own Shulcrum server.
 
-## Initial Configuration
+## Read this first: the keys are on your server
 
-The initial configuration of Sparrow is straightforward. You have two options:
+A wallet with its keys on an always-on machine is a hot wallet. Whoever reaches this interface
+controls the money in it.
 
-1. **Go with the Defaults**: If you prefer simplicity, you can use the default settings for `Webtop title`, `Username`, `Password`, and rendering. Simply click save and start the service.
+- **Use a watch-only wallet here** and sign transactions on a hardware wallet or an offline
+  computer, moving them as files. This package cannot use a USB hardware wallet directly, because
+  nothing is passed through from the server.
+- **Reach it over Tor,** or over your local network, rather than exposing it to the internet.
+- **Set a strong interface password**, in Settings. It is what stands between a browser and your
+  wallet.
+- **Your backups contain your wallets.** A StartOS backup of this package includes the wallet files.
+- **Signatures made here can be replayed on Bitcoin** unless the transaction opts out. That is a
+  property of the chain, not of this package.
 
-2. **Customize Settings**: If you want to personalize your Webtop experience, you can customize the `Webtop title`, `Username`, `Password`, and rendering options to your liking. After making your changes, click save and start the service.
+If you want a wallet that holds savings, run Shrike on your own computer instead and point it at
+Shulcrum on this server. That path needs no package at all.
 
-Now your Sparrow on Webtop is ready to be visited in your browser!
+## Getting started
 
-## Important Notes
+1. **Set the login** in Settings, under Actions. The interface refuses connections without it.
+2. **Open the interface.** Shrike starts by itself, already pointed at Shulcrum.
+3. **Create or import a wallet.** File, then New Wallet or Import Wallet.
 
-1. Only files and settings saved in your Webtop home folder are kept after a restart or update. Changes elsewhere in the desktop may be lost.
+## What is connected
 
-2. Sparrow keeps your wallet files, settings and logs in its home folder, so they remain available after a restart or update and are included in StartOS backups.
+Shrike is configured to use Shulcrum on this server as its Electrum server, over the local bridge,
+and the package sets that at every start. If you change the server inside the wallet, the next
+restart of this service sets it back.
 
-3. Webtop uses HTTPS Basic Authentication. Your browser asks you to log in on the first visit and remembers the credentials until they change.
+The "Electrum Server" health check opens the same connection the wallet uses, so it tells you
+whether the wallet can see the chain, not merely what it is configured to use.
 
-4. The Webtop desktop is based on Debian Linux. Sparrow creates a default configuration on first start. Use **Settings** to choose the Bitcoin or Electrum server and optional Tor proxy.
+## While Shulcrum is still indexing
 
-5. StartOS keeps the selected local server and Tor connection up to date automatically.
+Shulcrum answers wallet queries only once it has finished building its index, which takes days on a
+first run. Until then this wallet will show as disconnected, and the health check will say so. That
+is expected, and nothing here needs changing while you wait.
 
-6. You can run a text editor, file manager, terminal or a second instance of Sparrow by right-clicking the desktop. Sparrow opens maximized; double-click its title bar to reveal the desktop.
+## Limitations
 
-7. Sparrow on Webtop does not support cameras or USB devices. Keep this in mind when setting up wallets.
-
-8. Leave **Enable Wayland** on and **Force Software Rendering** off for normal hardware-accelerated operation. You can turn **Enable Wayland** off to use the older X11 desktop backend while retaining normal graphics-device detection.
-
-9. If the Web UI stays blank, flickers, or crashes because the server or virtual machine exposes incompatible graphics hardware, turn **Force Software Rendering** on and restart the service. It takes precedence over **Enable Wayland** and uses the slower CPU-only X11 compatibility path. It does not change Sparrow's wallet or server settings.
-
-## Control Panel
-
-The control panel on the left side of the Webtop interface provides options for controlling and interacting with your session.
-
-For more information, see the [KasmVNC Client Documentation](https://www.kasmweb.com/kasmvnc/docs/latest/clientside.html).
-
-## Good Luck!
-
-Enjoy your Sparrow on Webtop experience and happy experimenting!
+- No USB devices, so hardware wallets cannot be plugged into the server.
+- One user at a time.
+- The clipboard between your computer and the wallet depends on what your browser allows.

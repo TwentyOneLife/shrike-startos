@@ -1,37 +1,34 @@
-import { T } from '@start9labs/start-sdk'
 import { store } from './fileModels/store.yaml'
 import { sdk } from './sdk'
+import { shulcrumPackageId } from './utils'
 
 export const setDependencies = sdk.setupDependencies(async ({ effects }) => {
   const conf = await store.read().const(effects)
 
-  // no dependencies if we are not managing sparrow settings
-  if (!conf?.sparrow.managesettings) {
-    return {}
-  }
+  const useTor = conf?.shrike.proxy.type === 'tor'
 
-  const proxyType = conf.sparrow.proxy.type
-  const serverType = conf.sparrow.server.type
-
-  const deps: T.CurrentDependenciesResult<T.SDKManifest> = {}
-
-  if (serverType == 'fulcrum') {
-    deps['fulcrum'] = { kind: 'exists', versionRange: '>=2.1.1:6' }
-  } else if (serverType == 'frigate') {
-    deps['frigate'] = { kind: 'exists', versionRange: '>=1.5.3:5' }
-  } else if (serverType == 'electrs') {
-    deps['electrs'] = { kind: 'exists', versionRange: '>=0.11.1:9' }
-  } else if (serverType == 'bitcoind') {
-    deps['bitcoind'] = { kind: 'exists', versionRange: '>=28.4:13' }
-  }
-
-  if (proxyType == 'tor') {
-    deps['tor'] = {
+  return {
+    // Required, not optional: this wallet reads one chain and Shulcrum is what serves it. Running
+    // rather than merely installed, because a stopped server is a wallet that cannot see its
+    // money. No health check is required: the index takes days to build and the wallet is useful
+    // before it finishes, so this package reports the connection itself instead.
+    //
+    // The range is unflavored on purpose. Shulcrum's version is flavored (`#blake:...`) and a
+    // flavored version satisfies an unflavored range only through the `satisfies` list its own
+    // package declares, which is where that decision belongs.
+    [shulcrumPackageId]: {
       kind: 'running',
-      versionRange: '>=0.4.9.5:0',
+      versionRange: '>=2.1.2:0',
       healthChecks: [],
-    }
-  }
-
-  return deps
+    },
+    ...(useTor
+      ? {
+          tor: {
+            kind: 'running',
+            versionRange: '>=0.4.9.5:0',
+            healthChecks: [],
+          },
+        }
+      : {}),
+  } as const
 })
