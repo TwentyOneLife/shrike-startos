@@ -8,7 +8,7 @@ const dict = {
   'Electrum Server': 13,
   'Waiting for the Electrum server to be installed': 14,
   'Connected to Shulcrum': 15,
-  'Shulcrum is not answering': 16,
+  'Waiting for Shulcrum to answer': 16,
   'Interface login, rendering, and how the wallet connects': 17,
 
   // interfaces.ts

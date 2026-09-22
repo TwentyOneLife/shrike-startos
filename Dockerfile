@@ -126,7 +126,11 @@ ENV \
   START_DOCKER=false \
   GTK_THEME=Adwaita:dark \
   GTK2_RC_FILES=/usr/share/themes/Adwaita-dark/gtk-2.0/gtkrc \
-  SELKIES_H264_STREAMING_MODE=true \
+  # Upstream streams the whole screen 60 times a second, which suits a desktop and costs a core
+  # even when nothing moves: measured at 60 to 75 percent of one core with no browser attached, and
+  # 2.5 percent with this off. A wallet window is static almost all the time, and this package runs
+  # beside a node, so it encodes what changes instead.
+  SELKIES_H264_STREAMING_MODE=false \
   SELKIES_UI_SIDEBAR_SHOW_APPS=false \
   SELKIES_UI_SIDEBAR_SHOW_GAMEPADS=false \
   SELKIES_GAMEPAD_ENABLED=false \

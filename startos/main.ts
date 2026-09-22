@@ -138,7 +138,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
         fn: async () => {
           if (!shulcrumAddress)
             return {
-              result: 'failure',
+              result: 'loading',
               message: i18n('Waiting for the Electrum server to be installed'),
             }
           const res = await subcontainer.exec([
@@ -146,11 +146,15 @@ export const main = sdk.setupMain(async ({ effects }) => {
             '-c',
             `exec 3<>/dev/tcp/${shulcrumAddress.replace(':', '/')} && exec 3<&- 3>&-`,
           ])
+          // `loading`, not `failure`, when it does not answer. A stopped or still-indexing server
+          // is the ordinary state for days, StartOS logs every failed check once a second, and the
+          // dependency panel already says the server is not running. Reporting a fault here would
+          // fill the log and read as one.
           return res.exitCode === 0
             ? { result: 'success', message: i18n('Connected to Shulcrum') }
             : {
-                result: 'failure',
-                message: i18n('Shulcrum is not answering'),
+                result: 'loading',
+                message: i18n('Waiting for Shulcrum to answer'),
               }
         },
       },
