@@ -9,10 +9,10 @@ export const current = VersionInfo.of({
   // Flavored, as Shulcrum's package is: this is a wallet for one chain, and the flavor is what
   // stops it satisfying anything that wanted Sparrow on Bitcoin. The number tracks Shrike's
   // upstream version; the revision after it is this package's own.
-  version: '#blake:2.5.5:0',
+  version: '#blake:2.5.5:1',
   releaseNotes: {
     en_US:
-      'First release: Shrike 2.5.5-blake2b.26 as a wallet you reach from a browser, connected to Shulcrum on the same server.',
+      'The wallet no longer encodes its screen while nothing is happening, which cost most of a CPU core on an idle server. The Electrum check now waits for Shulcrum rather than reporting a failure while it is stopped or still building its index.',
   },
   migrations: {
     up: async ({ effects }) => {},
