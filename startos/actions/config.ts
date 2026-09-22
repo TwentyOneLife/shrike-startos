@@ -7,26 +7,26 @@ const { InputSpec, Value, Variants } = sdk
 
 export const inputSpec = InputSpec.of({
   title: Value.text({
-    name: 'Webtop Title',
+    name: 'Browser Tab Title',
     description:
       'This value will be displayed as the title of your browser tab.',
     required: true,
-    default: 'Sparrow on StartOS',
-    placeholder: 'Sparrow on StartOS',
+    default: 'Shrike',
+    placeholder: 'Shrike',
     patterns: [utils.Patterns.ascii],
   }),
   username: Value.text({
     name: 'Username',
-    description: 'The username for logging into your Webtop.',
+    description: 'The username for logging into the wallet interface.',
     required: true,
-    default: 'webtop',
+    default: 'shrike',
     placeholder: '',
     masked: false,
     patterns: [utils.Patterns.ascii],
   }),
   password: Value.text({
     name: 'Password',
-    description: 'The password for logging into your Webtop.',
+    description: 'The password for logging into the wallet interface.',
     required: true,
     generate: {
       charset: 'a-z,0-9',
@@ -51,97 +51,21 @@ export const inputSpec = InputSpec.of({
     ),
     default: false,
   }),
-  sparrow: Value.object(
+  shrike: Value.object(
     {
-      name: 'Sparrow settings',
-      description: 'Sparrow settings',
+      name: 'Wallet settings',
+      description: 'How Shrike reaches the chain',
     },
     InputSpec.of({
-      managesettings: Value.toggle({
-        name: 'Apply settings on startup',
-        description:
-          'Disable to manage your own server and proxy settings in Sparrow',
-        default: true,
-      }),
-      server: Value.dynamicUnion(async ({ effects }) => {
-        // determine default server type and disabled options
-        const installedPackages = await effects.getInstalledPackages()
-        let serverType:
-          | 'frigate'
-          | 'fulcrum'
-          | 'electrs'
-          | 'bitcoind'
-          | 'public' = 'public'
-        let disabled: string[] = []
-
-        if (installedPackages.includes('bitcoind')) {
-          serverType = 'bitcoind'
-        } else {
-          disabled.push('bitcoind')
-        }
-
-        if (installedPackages.includes('electrs')) {
-          serverType = 'electrs'
-        } else {
-          disabled.push('electrs')
-        }
-
-        if (installedPackages.includes('fulcrum')) {
-          serverType = 'fulcrum'
-        } else {
-          disabled.push('fulcrum')
-        }
-
-        // frigate takes priority as default when installed
-        if (installedPackages.includes('frigate')) {
-          serverType = 'frigate'
-        } else {
-          disabled.push('frigate')
-        }
-
-        return {
-          name: 'Server',
-          description: 'Bitcoin/Electrum Server',
-          default: serverType,
-          disabled: disabled,
-          variants: Variants.of({
-            frigate: {
-              name:
-                'Frigate' +
-                (disabled.includes('frigate') ? ' (not installed)' : ''),
-              spec: InputSpec.of({}),
-            },
-            fulcrum: {
-              name:
-                'Fulcrum (recommended)' +
-                (disabled.includes('fulcrum') ? ' (not installed)' : ''),
-              spec: InputSpec.of({}),
-            },
-            electrs: {
-              name:
-                'Electrs' +
-                (disabled.includes('electrs') ? ' (not installed)' : ''),
-              spec: InputSpec.of({}),
-            },
-            bitcoind: {
-              name:
-                'Local Bitcoin Node' +
-                (disabled.includes('bitcoind') ? ' (not installed)' : ''),
-              spec: InputSpec.of({}),
-            },
-            public: {
-              name: 'Public (not recommended)',
-              spec: InputSpec.of({}),
-            },
-          }),
-        }
-      }),
       proxy: Value.dynamicUnion(async ({ effects }) => {
-        const installedPackages = await effects.getInstalledPackages()
-        const torInstalled = installedPackages.includes('tor')
+        const torInstalled = (await effects.getInstalledPackages()).includes(
+          'tor',
+        )
         return {
           name: 'Proxy',
-          description: 'Proxy settings',
+          // Shrike's own outbound connections, not how you reach this interface. The Electrum
+          // server is on this box, so this matters for the few things the wallet fetches itself.
+          description: 'Proxy for connections the wallet makes itself',
           default: torInstalled ? 'tor' : 'none',
           disabled: [],
           variants: Variants.of({
@@ -168,7 +92,7 @@ export const config = sdk.Action.withInput(
   async ({ effects }) => ({
     name: 'Settings',
     description: i18n(
-      'Webtop username/password, rendering, and connection settings',
+      'Interface login, rendering, and how the wallet connects',
     ),
     warning: null,
     allowedStatuses: 'any',
@@ -202,18 +126,9 @@ async function readSettings(effects: T.Effects): Promise<PartialInputSpec> {
     password: settings.password,
     enableWayland: settings.enableWayland,
     forceSoftwareRendering: settings.forceSoftwareRendering,
-    sparrow: {
-      managesettings: settings.sparrow.managesettings,
-      server: {
-        selection: settings.sparrow.server.type as
-          | 'frigate'
-          | 'fulcrum'
-          | 'electrs'
-          | 'bitcoind'
-          | 'public',
-      },
+    shrike: {
       proxy: {
-        selection: settings.sparrow.proxy.type as 'tor' | 'none',
+        selection: settings.shrike.proxy.type as 'tor' | 'none',
       },
     },
   }
@@ -226,13 +141,9 @@ async function writeSettings(effects: T.Effects, input: InputSpec) {
     password: input.password,
     enableWayland: input.enableWayland,
     forceSoftwareRendering: input.forceSoftwareRendering,
-    sparrow: {
-      managesettings: input.sparrow.managesettings,
-      server: {
-        type: input.sparrow.server.selection,
-      },
+    shrike: {
       proxy: {
-        type: input.sparrow.proxy.selection,
+        type: input.shrike.proxy.selection,
       },
     },
   })

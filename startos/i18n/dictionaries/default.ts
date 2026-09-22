@@ -3,40 +3,22 @@ export const DEFAULT_LANG = 'en_US'
 const dict = {
   // main.ts
   'The web interface is ready': 1,
-  'The web interface is not ready': 2,
   'Password is required': 3,
   'The web interface is unreachable': 4,
-  'Connected Node': 5,
-  'Invalid RPC credentials, Recreate them in the Action menu': 6,
-  'Failed to connect to local Bitcoin node': 7,
-  'Connected to local Bitcoin node': 8,
-  'Using local electrum server': 9,
-  'Change settings to not use a public electrum server': 10,
-  'Using a public electrum server': 11,
-  'Selected server is unavailable': 12,
+  'Electrum Server': 13,
+  'Waiting for the Electrum server to be installed': 14,
+  'Connected to Shulcrum': 15,
+  'Shulcrum is not answering': 16,
+  'Interface login, rendering, and how the wallet connects': 17,
 
   // interfaces.ts
   'Web Interface': 100,
 
-  // actions/uiCredentials.ts
-  'Show the credentials for the web UI.': 200,
-  'Username for the web UI': 201,
-  'Password for the web UI': 202,
-
   // actions/config.ts
-  'The username for logging into your Webtop.': 300,
-  'The password for logging into your Webtop.': 301,
-  'Sparrow settings': 302,
-  'Bitcoin/Electrum Server': 303,
-  'Proxy settings': 304,
-  'Webtop username/password, rendering, and connection settings': 305,
   'Enable Wayland': 306,
   'Use the Wayland desktop backend. Disable this for the older X11 compatibility backend. Force Software Rendering takes precedence and uses X11.': 307,
   'Force Software Rendering': 308,
   'Use the CPU-only X11 compatibility path without graphics devices. Enable this if the Web UI is blank or unstable because of incompatible graphics hardware. This overrides Enable Wayland, is slower, and takes effect after restart.': 309,
-
-  // manifest/index.ts
-  'Used to connect to your Bitcoin node.': 400,
 } as const
 
 export type I18nKey = keyof typeof dict

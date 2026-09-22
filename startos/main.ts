@@ -1,79 +1,38 @@
-import * as fs from 'node:fs/promises'
-import { FileHelper } from '@start9labs/start-sdk'
-import {
-  rpcHostId,
-  rpcPort,
-  rpccookiefile,
-} from 'bitcoin-core-startos/startos/utils'
-import {
-  electrumHostId as electrsHostId,
-  port as electrsPort,
-} from 'electrs-startos/startos/utils'
-import {
-  electrumHostId as frigateHostId,
-  electrumPort as frigatePort,
-} from 'frigate-startos/startos/constants'
-import {
-  electrumPort as fulcrumPort,
-  mainHostId as fulcrumHostId,
-} from 'fulcrum-startos/startos/utils'
 import { socksHostId, socksPort } from 'tor-startos/startos/utils'
 import { sdk } from './sdk'
-import { uiPort } from './utils'
+import {
+  shulcrumHostId,
+  shulcrumPackageId,
+  shulcrumPort,
+  uiPort,
+} from './utils'
 import { store } from './fileModels/store.yaml'
-import { sparrow } from './fileModels/sparrow.json'
-import { config } from './actions/config'
+import { shrike } from './fileModels/shrike.json'
 import { i18n } from './i18n'
 
 export const main = sdk.setupMain(async ({ effects }) => {
-  console.info('setupMain: Setting up Sparrow webtop...')
+  console.info('Starting Shrike')
 
-  // watch the store for changes (restarts the service when config changes)
+  // Watching the settings restarts the service when they change, which is what applies them:
+  // Shrike reads its config file once, at startup.
   const conf = await store.read().const(effects)
 
   if (!conf?.password) {
     throw new Error(i18n('Password is required'))
   }
 
-  const selectedAddress =
-    conf.sparrow.managesettings && conf.sparrow.server.type === 'bitcoind'
-      ? await sdk.host
-          .getBridgeAddress(effects, {
-            packageId: 'bitcoind',
-            hostId: rpcHostId,
-            internalPort: rpcPort,
-            ssl: false,
-          })
-          .const()
-      : conf.sparrow.managesettings && conf.sparrow.server.type === 'fulcrum'
-        ? await sdk.host
-            .getBridgeAddress(effects, {
-              packageId: 'fulcrum',
-              hostId: fulcrumHostId,
-              internalPort: fulcrumPort,
-            })
-            .const()
-        : conf.sparrow.managesettings && conf.sparrow.server.type === 'frigate'
-          ? await sdk.host
-              .getBridgeAddress(effects, {
-                packageId: 'frigate',
-                hostId: frigateHostId,
-                internalPort: frigatePort,
-              })
-              .const()
-          : conf.sparrow.managesettings &&
-              conf.sparrow.server.type === 'electrs'
-            ? await sdk.host
-                .getBridgeAddress(effects, {
-                  packageId: 'electrs',
-                  hostId: electrsHostId,
-                  internalPort: electrsPort,
-                })
-                .const()
-            : null
+  // Where Shulcrum answers on the bridge. Null while it is not installed, which the dependency
+  // makes a visible state rather than a broken wallet.
+  const shulcrumAddress = await sdk.host
+    .getBridgeAddress(effects, {
+      packageId: shulcrumPackageId,
+      hostId: shulcrumHostId,
+      internalPort: shulcrumPort,
+    })
+    .const()
 
   const proxyAddress =
-    conf.sparrow.managesettings && conf.sparrow.proxy.type === 'tor'
+    conf.shrike.proxy.type === 'tor'
       ? await sdk.host
           .getBridgeAddress(effects, {
             packageId: 'tor',
@@ -84,46 +43,28 @@ export const main = sdk.setupMain(async ({ effects }) => {
           .const()
       : null
 
-  /*
-   * Subcontainer setup
-   */
-  let mounts = sdk.Mounts.of()
-    .mountVolume({
-      volumeId: 'main',
-      subpath: null,
-      mountpoint: '/root/data',
-      readonly: false,
-    })
-    .mountVolume({
-      volumeId: 'userdir',
-      subpath: null,
-      mountpoint: '/config',
-      readonly: false,
-    })
-
-  if (conf.sparrow.managesettings && conf.sparrow.server.type == 'bitcoind') {
-    mounts = mounts.mountDependency({
-      dependencyId: 'bitcoind',
-      volumeId: 'main',
-      subpath: null,
-      mountpoint: '/tmp/bitcoin',
-      readonly: true,
-    })
-  }
-
-  // main subcontainer (the webtop container)
   const subcontainer = await sdk.SubContainer.eager(
     effects,
-    {
-      imageId: 'main',
-    },
-    mounts,
+    { imageId: 'main' },
+    sdk.Mounts.of()
+      .mountVolume({
+        volumeId: 'main',
+        subpath: null,
+        mountpoint: '/root/data',
+        readonly: false,
+      })
+      .mountVolume({
+        volumeId: 'userdir',
+        subpath: null,
+        mountpoint: '/config',
+        readonly: false,
+      }),
     'main',
   )
 
   if (!conf.forceSoftwareRendering) {
-    // StartOS binds DRI devices into the container as root:root, so the
-    // unprivileged desktop user cannot open them without this.
+    // StartOS binds DRI devices into the container as root:root, so the unprivileged desktop user
+    // cannot open them without this.
     await subcontainer.exec([
       'sh',
       '-c',
@@ -131,205 +72,88 @@ export const main = sdk.setupMain(async ({ effects }) => {
     ])
   }
 
-  /*
-   * Sparrow settings
-   */
-  if (conf.sparrow.managesettings) {
-    let sparrowConfig = {}
-
-    // server config
-    if (conf.sparrow.server.type == 'bitcoind') {
-      if (!selectedAddress) {
-        throw new Error(i18n('Selected server is unavailable'))
-      }
-      async function copyCookieFile() {
-        // copy the .cookie file to a location where we can chown it
-        const srcPath = `${subcontainer.rootfs}/tmp/bitcoin/${rpccookiefile}`
-        const destPath = `${subcontainer.rootfs}/mnt/bitcoin/.cookie`
-        await fs.mkdir(`${subcontainer.rootfs}/mnt/bitcoin`, {
-          recursive: true,
-        })
-        await fs.copyFile(srcPath, destPath)
-        await fs.chown(destPath, 1000, 1000)
-        await fs.chmod(destPath, 0o400)
-      }
-
-      // watch for .cookie changes and copy it to the correct location.
-      // no need to use .const() / restart the service since Sparrow will pick up changes to the .cookie file automatically
-      await FileHelper.string(
-        `${subcontainer.rootfs}/tmp/bitcoin/${rpccookiefile}`,
-      )
-        // Ignore removal during Bitcoin Core shutdown; copy the new cookie
-        // once Bitcoin Core starts again.
-        .read(
-          (cookie) => cookie,
-          (prev, next) => next === null || prev === next,
-        )
-        .onChange(effects, async (value, error) => {
-          // note that .onChange is triggered once immediately
-          console.info('.cookie file changed, updating permissions...')
-          await copyCookieFile()
-          return { cancel: false }
-        })
-
-      sparrowConfig = {
-        ...sparrowConfig,
-        serverType: 'BITCOIN_CORE',
-        // socat proxy, to avoid going over tor (sparrow avoids tor only for local addresses)
-        coreServer: `http://${selectedAddress}`,
-        coreAuthType: 'COOKIE',
-        coreAuth: '',
-        coreDataDir: '/mnt/bitcoin',
-      }
-    } else if (conf.sparrow.server.type == 'fulcrum') {
-      if (!selectedAddress) {
-        throw new Error(i18n('Selected server is unavailable'))
-      }
-      sparrowConfig = {
-        ...sparrowConfig,
-        serverType: 'ELECTRUM_SERVER',
-        electrumServer: `tcp://${selectedAddress}`,
-      }
-    } else if (conf.sparrow.server.type == 'frigate') {
-      if (!selectedAddress) {
-        throw new Error(i18n('Selected server is unavailable'))
-      }
-      sparrowConfig = {
-        ...sparrowConfig,
-        serverType: 'ELECTRUM_SERVER',
-        electrumServer: `tcp://${selectedAddress}`,
-      }
-    } else if (conf.sparrow.server.type == 'electrs') {
-      if (!selectedAddress) {
-        throw new Error(i18n('Selected server is unavailable'))
-      }
-      sparrowConfig = {
-        ...sparrowConfig,
-        serverType: 'ELECTRUM_SERVER',
-        electrumServer: `tcp://${selectedAddress}`,
-      }
-    } else if (conf.sparrow.server.type == 'public') {
-      sparrowConfig = {
-        ...sparrowConfig,
-        serverType: 'PUBLIC_ELECTRUM_SERVER',
-      }
-    }
-
-    // proxy config
-    if (conf.sparrow.proxy.type == 'tor') {
-      sparrowConfig = {
-        ...sparrowConfig,
-        useProxy: true,
-        proxyServer: proxyAddress!,
-      }
-    } else {
-      sparrowConfig = {
-        ...sparrowConfig,
-        useProxy: false,
-      }
-    }
-
-    // create default config file if it does not exist
-    const configFile = `${subcontainer.rootfs}/config/.sparrow/config`
-    try {
-      await fs.access(configFile, fs.constants.F_OK)
-    } catch (e) {
-      await subcontainer.exec([
-        'sh',
-        '-c',
-        `
-         mkdir -p /config/.sparrow && 
-         cp /defaults/.sparrow/config /config/.sparrow/config && 
-         chown -R 1000:1000 /config/.sparrow
-        `,
-      ])
-    }
-
-    // merge with existing config file
-    await sparrow.merge(effects, sparrowConfig)
+  // The wallet arrives connected. A user who has to type a server address into a wallet that is
+  // already running beside one has been handed the packaging problem to solve themselves.
+  if (shulcrumAddress) {
+    await subcontainer.exec([
+      'sh',
+      '-c',
+      'test -f /config/.shrike/config || { mkdir -p /config/.shrike && cp /defaults/.shrike/config /config/.shrike/config; }; chown -R 1000:1000 /config/.shrike',
+    ])
+    await shrike.merge(effects, {
+      serverType: 'ELECTRUM_SERVER',
+      electrumServer: `tcp://${shulcrumAddress}`,
+      ...(proxyAddress
+        ? { useProxy: true, proxyServer: proxyAddress }
+        : { useProxy: false }),
+    })
   }
 
-  /*
-   * Daemons
-   */
-  // The X11 applications in this image do not render when both the outer
-  // compositor and Labwc use their software Wayland paths. Force Software
-  // Rendering therefore takes precedence over the stored Wayland preference
-  // and selects the validated CPU-only X11 path instead.
+  // The X11 applications in this image do not render when both the outer compositor and Labwc use
+  // their software Wayland paths. Force Software Rendering therefore takes precedence over the
+  // stored Wayland preference and selects the validated CPU-only X11 path instead.
   const enableWayland = conf.enableWayland && !conf.forceSoftwareRendering
 
-  const primaryDaemon = sdk.Daemons.of(effects).addDaemon('primary', {
-    subcontainer: subcontainer,
-    exec: {
-      command: sdk.useEntrypoint(),
-      runAsInit: true,
-      env: {
-        PUID: '1000',
-        PGID: '1000',
-        TZ: 'Etc/UTC',
-        TITLE: conf.title,
-        CUSTOM_USER: conf.username,
-        PASSWORD: conf.password,
-        PIXELFLUX_WAYLAND: enableWayland ? 'true' : 'false',
-        ...(conf.forceSoftwareRendering
-          ? {
-              AUTO_GPU: 'false',
-              SELKIES_USE_CPU: 'true|locked',
-              DISABLE_DRI3: 'true',
-              DISABLE_ZINK: 'true',
-              LIBGL_ALWAYS_SOFTWARE: 'true',
-            }
-          : {}),
+  return sdk.Daemons.of(effects)
+    .addDaemon('primary', {
+      subcontainer,
+      exec: {
+        command: sdk.useEntrypoint(),
+        runAsInit: true,
+        env: {
+          PUID: '1000',
+          PGID: '1000',
+          TZ: 'Etc/UTC',
+          TITLE: conf.title,
+          CUSTOM_USER: conf.username,
+          PASSWORD: conf.password,
+          PIXELFLUX_WAYLAND: enableWayland ? 'true' : 'false',
+          ...(conf.forceSoftwareRendering
+            ? {
+                AUTO_GPU: 'false',
+                SELKIES_USE_CPU: 'true|locked',
+                DISABLE_DRI3: 'true',
+                DISABLE_ZINK: 'true',
+                LIBGL_ALWAYS_SOFTWARE: 'true',
+              }
+            : {}),
+        },
       },
-    },
-    ready: {
-      display: i18n('Web Interface'),
-      fn: () =>
-        sdk.healthCheck.checkWebUrl(effects, 'http://127.0.0.1:' + uiPort, {
-          successMessage: i18n('The web interface is ready'),
-          errorMessage: i18n('The web interface is unreachable'),
-        }),
-    },
-    requires: [],
-  })
-
-  // if we are managing the Sparrow settings, add a health check to display the connected server
-  if (conf.sparrow.managesettings) {
-    primaryDaemon.addHealthCheck('check-connected-node', {
       ready: {
-        display: i18n('Connected Node'),
+        display: i18n('Web Interface'),
+        fn: () =>
+          sdk.healthCheck.checkWebUrl(effects, 'http://127.0.0.1:' + uiPort, {
+            successMessage: i18n('The web interface is ready'),
+            errorMessage: i18n('The web interface is unreachable'),
+          }),
+      },
+      requires: [],
+    })
+    .addHealthCheck('electrum-server', {
+      // Answers "can this wallet reach its server", by opening the connection the wallet itself
+      // makes. The package this was forked from reported the configured server type instead, which
+      // is a check that cannot fail and so says nothing.
+      ready: {
+        display: i18n('Electrum Server'),
         fn: async () => {
-          if (conf.sparrow.server.type == 'bitcoind') {
+          if (!shulcrumAddress)
             return {
-              message: i18n('Connected to local Bitcoin node'),
-              result: 'success',
+              result: 'failure',
+              message: i18n('Waiting for the Electrum server to be installed'),
             }
-          }
-
-          if (
-            conf.sparrow.server.type == 'electrs' ||
-            conf.sparrow.server.type == 'fulcrum' ||
-            conf.sparrow.server.type == 'frigate'
-          ) {
-            return {
-              message: i18n('Using local electrum server'),
-              result: 'success',
-            }
-          }
-
-          sdk.action.createOwnTask(effects, config, 'important', {
-            reason: i18n('Change settings to not use a public electrum server'),
-          })
-
-          return {
-            message: i18n('Using a public electrum server'),
-            result: 'failure',
-          }
+          const res = await subcontainer.exec([
+            'bash',
+            '-c',
+            `exec 3<>/dev/tcp/${shulcrumAddress.replace(':', '/')} && exec 3<&- 3>&-`,
+          ])
+          return res.exitCode === 0
+            ? { result: 'success', message: i18n('Connected to Shulcrum') }
+            : {
+                result: 'failure',
+                message: i18n('Shulcrum is not answering'),
+              }
         },
       },
       requires: [],
     })
-  }
-
-  return primaryDaemon
 })

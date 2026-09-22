@@ -7,19 +7,8 @@ const shape = z.object({
   password: z.string().optional(),
   enableWayland: z.boolean().catch(true),
   forceSoftwareRendering: z.boolean().catch(false),
-  sparrow: z.object({
-    managesettings: z.boolean(),
-    server: z.object({
-      type: z
-        .union([
-          z.literal('frigate'),
-          z.literal('fulcrum'),
-          z.literal('electrs'),
-          z.literal('bitcoind'),
-          z.literal('public'),
-        ])
-        .catch('fulcrum'),
-    }),
+  // No server choice: this wallet reads one chain, and Shulcrum is the only server that serves it.
+  shrike: z.object({
     proxy: z.object({
       type: z.union([z.literal('tor'), z.literal('none')]).catch('tor'),
     }),
@@ -41,33 +30,18 @@ export const createDefaultStore = async (effects: T.Effects) => {
   const conf = await store.read().once()
   if (conf) {
     // already exists — nothing to migrate (stale user/password keys will be preserved but ignored)
-    console.log('Sparrow config file already exists, skipping default creation')
+    console.log('settings already exist, skipping default creation')
     return
   }
 
   // config file does not exist, create it
-  console.log('Sparrow config file does not exist, creating it')
-  const installedPackages = await effects.getInstalledPackages()
-  const serverType = installedPackages.includes('frigate')
-    ? 'frigate'
-    : installedPackages.includes('fulcrum')
-      ? 'fulcrum'
-      : installedPackages.includes('electrs')
-        ? 'electrs'
-        : installedPackages.includes('bitcoind')
-          ? 'bitcoind'
-          : 'public'
-
+  console.log('no settings yet, writing the defaults')
   await store.write(effects, {
-    title: 'Sparrow on StartOS',
-    username: 'webtop',
+    title: 'Shrike',
+    username: 'shrike',
     enableWayland: true,
     forceSoftwareRendering: false,
-    sparrow: {
-      managesettings: true,
-      server: {
-        type: serverType,
-      },
+    shrike: {
       proxy: {
         type: 'tor',
       },
