@@ -130,10 +130,14 @@ ENV \
   START_DOCKER=false \
   GTK_THEME=Adwaita:dark \
   GTK2_RC_FILES=/usr/share/themes/Adwaita-dark/gtk-2.0/gtkrc \
-  # Upstream streams the whole screen 60 times a second, which suits a desktop and costs a core
-  # even when nothing moves: measured at 60 to 75 percent of one core with no browser attached, and
-  # 2.5 percent with this off. A wallet window is static almost all the time, and this package runs
-  # beside a node, so it encodes what changes instead.
+  # Upstream streams the whole screen at a fixed rate, which suits a desktop and is wasted on a
+  # wallet window that is static almost all the time, on a machine that is also running a node. So
+  # this encodes what changes instead.
+  #
+  # The first measurement offered for this compared two containers that had not had the same
+  # treatment, one of which had been opened in a browser, so the figure it produced belonged to the
+  # session rather than to this setting. Both images idle the same with no client attached, so what
+  # this setting is worth has to be measured with a browser watching and again after it leaves.
   SELKIES_H264_STREAMING_MODE=false \
   SELKIES_UI_SIDEBAR_SHOW_APPS=false \
   SELKIES_UI_SIDEBAR_SHOW_GAMEPADS=false \
