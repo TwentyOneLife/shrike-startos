@@ -166,6 +166,18 @@ ENV \
   # for more, and the side menu can raise both.
   SELKIES_FRAMERATE="8-15" \
   SELKIES_USE_CSS_SCALING=true \
+  # A fixed desktop, scaled into whatever window is looking at it, rather than a desktop the window
+  # reshapes. Without this the session follows the page's layout down to absurdity: with a browser's
+  # developer console open, a real session was resized to 1400x200 and then 1400x100 and went black,
+  # because a hundred-pixel strip is what was left for it. A wallet that rearranges itself when a
+  # pane opens, and re-encodes the screen on every drag of a window edge, is not one to hand anyone.
+  #
+  # 1920x1080 because it is the size desktop software is written for, so no dialog arrives clipped.
+  # It costs more than a smaller desktop over a slow link, though less than the area suggests, since
+  # only what changes is encoded and a wallet is mostly still.
+  SELKIES_MANUAL_RESOLUTION=true \
+  SELKIES_MANUAL_WIDTH=1920 \
+  SELKIES_MANUAL_HEIGHT=1080 \
   # A wallet has nothing to say. Audio also fails outright in a browser that resists fingerprinting,
   # where AudioDecoder is withheld along with the rest of WebCodecs, so leaving it on means a worker
   # throwing on repeat for a feature nobody wants.
