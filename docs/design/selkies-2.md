@@ -162,3 +162,25 @@ size argument was sound and irrelevant; the bandwidth had already been measured 
 was not consulted. Pinned at 1280x800 instead, which is a normal desktop size, lays dialogs out
 fine, and costs what the link can carry. Size is paid for on every frame: decide it against the
 measurement, not against what desktops usually are.
+
+## Addendum: the interface cannot be TLS-only, and the reason matters
+
+Binding the plaintext port asks the OS for an `http` origin and it publishes an https address
+**beside** it, not instead of it. Measured on a node: external port 58604 answered plain HTTP and
+64634 answered TLS, both the same interface, so the interface password could cross a LAN readable
+to anyone who used the first.
+
+The image serves TLS itself, so binding that port instead looked like the fix, and mechanically it
+was: the OS then published no plaintext external port at all. **It also took the onion down.** The
+Tor address is served by the plaintext binding, because an onion needs no TLS: the address is the
+server's public key, so it authenticates the server by itself. Disabling the plaintext binding left
+the onion with nothing to answer with, and the address refused connections.
+
+Reverted. This package exists to be reached over Tor, and trading that for the removal of a LAN port
+that Open UI never sends anyone to is a bad trade.
+
+**What to do instead:** reach the interface through Open UI, which offers the encrypted address, and
+install the server's Root CA in the browser so that address is actually trusted. An untrusted
+certificate warning that appears every time teaches people to click through the one that matters.
+
+Do not try the TLS-only binding again without first arranging for the onion to survive it.
