@@ -137,3 +137,20 @@ refuses gamepads rather than that the button is gone.
 This is the same lesson as the application catalogue, in a second place: a setting that the page
 applies is a rendering default, not a control. Treat anything that matters as needing either a lock
 or removal from the image.
+
+## Addendum: the desktop is pinned, not negotiated
+
+By default the session takes its size from the page that is watching it. That sounds reasonable and
+is not: the page's layout is not a statement about how big a desktop should be. Observed on the
+node, with a browser's developer console open, the client asked in sequence for 1400x700, then
+1400x200, then 1400x100, and the session obliged each time. What was left was a hundred-pixel strip,
+which reads as a black screen, and the wallet looked broken when nothing was wrong with it.
+
+Pinned to 1920x1080 with `manual_resolution`, the window becomes a viewport onto a stable desktop
+rather than a command to reshape it. Verified against a 1400x120 viewport: the client reports
+`Manual Mode: true` and the server holds `Res: 1920x1080`, where before it would have followed.
+
+1920x1080 because that is the size desktop software is laid out for, so no dialog arrives clipped.
+It costs more than a smaller desktop on a slow link, though less than the area difference suggests,
+since only damaged regions are encoded and a wallet is mostly still. The second benefit is quieter
+and possibly larger: a dragged window edge no longer re-encodes the whole screen.
