@@ -7,8 +7,11 @@
 #   - the session carries the wallet and nothing else: no terminal, no file manager, no sudo;
 #   - the base image is pinned by digest, because a tag moves.
 #
-# debiantrixie-47b9bee2-ls131, resolved 2026-09-22.
-FROM ghcr.io/linuxserver/baseimage-selkies@sha256:3058b8387268c13bc4d6fc64f5b222a67cfdd6dc70836e3db9d0d5c9894224f1 AS buildstage
+# dev-5e1478e9-ls23, resolved 2026-09-23. This is the base image's development line, which builds
+# Selkies from its main branch, and it is here for one reason: Selkies 1.x cannot stream to a
+# browser that withholds the WebCodecs API, and Tor Browser withholds it at every security level.
+# See docs/design/selkies-2.md. The release line is still 1.x; when it carries 2.x, move to it.
+FROM ghcr.io/linuxserver/baseimage-selkies@sha256:e00907648e3675afff81558667084fc840de46ca2b0a7b4f45e09d89c523379a AS buildstage
 
 ARG ARCH=amd64
 ARG SHRIKE_VERSION=v2.5.5-blake2b.26
@@ -127,22 +130,35 @@ ENV \
   PERL5LIB=/usr/local/bin \
   HOME=/config \
   PULSE_RUNTIME_PATH=/defaults \
-  SELKIES_INTERPOSER=/usr/lib/selkies_joystick_interposer.so \
+  SHELL=/bin/bash \
+  __GL_SYNC_TO_VBLANK=0 \
+  SELKIES_INTERPOSER=/usr/lib/selkies_input_interposer.so \
+  SELKIES_WEBCAM_INTERPOSER=/usr/lib/selkies_v4l2_interposer.so \
+  SELKIES_ALLOWED_ORIGINS="*" \
+  # Not a credential and not laxity: nginx in front of this holds the password, and Selkies' own
+  # basic auth defaults to on and refuses to start the server until it is given a password of its
+  # own. Leaving this out would mean two passwords for one door, or a container that will not boot.
+  SELKIES_ENABLE_BASIC_AUTH=false \
   NVIDIA_DRIVER_CAPABILITIES=all \
-  DISABLE_ZINK=false \
   DISABLE_DRI3=false \
-  SELKIES_ENCODER="x264enc,jpeg" \
+  SELKIES_ENCODER="h264enc,h265enc,vp8enc,vp9enc,av1enc,jpeg" \
   START_DOCKER=false \
   GTK_THEME=Adwaita:dark \
   GTK2_RC_FILES=/usr/share/themes/Adwaita-dark/gtk-2.0/gtkrc \
-  # Upstream streams the whole screen at a fixed rate. Measured on their published image with a
-  # headless browser watching: 73.7 percent of a core against 13.1 percent with this off, same
-  # machine, same client, same window size. Neither costs anything once the tab is closed.
+  # Upstream streams the whole screen at a fixed rate. Measured with a headless browser watching:
+  # 73.7 percent of a core against 13.1 percent with this off, same machine, same client, same
+  # window size. Neither costs anything once the tab is closed.
   #
   # Five times the CPU for a smoother stream is a fair trade on a desktop. It is a poor one for a
   # wallet window that is static almost all the time, on a server that is also running a node, so
-  # this encodes what changes instead.
-  SELKIES_H264_STREAMING_MODE=false \
+  # this encodes what changes instead. Selkies 2.0 made this its own default; it stays here because
+  # a squashed image inherits no environment and because the reason is worth keeping written down.
+  SELKIES_VIDEO_STREAMING_MODE=false \
+  # A wallet has nothing to say. Audio also fails outright in a browser that resists fingerprinting,
+  # where AudioDecoder is withheld along with the rest of WebCodecs, so leaving it on means a worker
+  # throwing on repeat for a feature nobody wants.
+  SELKIES_AUDIO_ENABLED=false \
+  SELKIES_MICROPHONE_ENABLED=false \
   SELKIES_UI_SIDEBAR_SHOW_APPS=false \
   SELKIES_UI_SIDEBAR_SHOW_GAMEPADS=false \
   SELKIES_GAMEPAD_ENABLED=false \
