@@ -36,12 +36,43 @@ jobs:
         language: [javascript-typescript, actions]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - uses: github/codeql-action/init@16df4fbc19aea13d921737a0d5a2dad4ba6e2b76 # v3.30.3
+      - uses: github/codeql-action/init@416ff0dea110f80f0f56f0046500dbf7420e4bb0 # codeql-bundle-v2.27.1
         with:
           language: ${{ matrix.language }}
-      - uses: github/codeql-action/analyze@16df4fbc19aea13d921737a0d5a2dad4ba6e2b76 # v3.30.3
+      - uses: github/codeql-action/analyze@416ff0dea110f80f0f56f0046500dbf7420e4bb0 # codeql-bundle-v2.27.1
         with:
           category: /language:${{ matrix.language }}
+
+  pinned-actions-exist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Every pinned action SHA resolves to a real commit
+        # Added because a pin in this very file was a SHA that did not exist: forty plausible hex
+        # characters that no commit ever had. The job failed to start, which is the good case. A
+        # pin is only a safety measure if it points at something, and nothing else checks that.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          bad=0
+          grep -rhoE 'uses: [a-zA-Z0-9._/-]+@[0-9a-f]{40}' .github/ | sed 's/uses: //' | sort -u |
+          while IFS=@ read -r action sha; do
+            repo=$(echo "$action" | cut -d/ -f1,2)
+            if gh api "repos/$repo/commits/$sha" --jq '.sha' >/dev/null 2>&1; then
+              echo "  ok   $action"
+            else
+              echo "  BAD  $action does not exist"
+              bad=1
+            fi
+            # The loop runs in a subshell, so the failure is recorded where the parent can see it.
+            [ "$bad" -eq 0 ] || touch /tmp/bad-pin
+          done
+          if [ -e /tmp/bad-pin ]; then
+            echo "A pinned action does not exist. A pin that points at nothing is not a pin."
+            exit 1
+          fi
+          echo "every pinned action resolves"
 
   shellcheck:
     runs-on: ubuntu-latest
