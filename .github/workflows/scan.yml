@@ -1,0 +1,57 @@
+name: Scan
+
+# Two tools rather than one, because the code that matters here is not the code CodeQL reads.
+#
+# This repository is about six hundred lines of TypeScript that mostly calls an SDK, and CodeQL will
+# find little in it. What it does read usefully is the workflows: these handle a GPG signing key, a
+# passphrase and a package signing key, and a workflow that mishandles untrusted input is a real way
+# to lose them.
+#
+# The security-critical code here is shell. strip-proot-apps.sh decides whether an application
+# catalogue leaves the wallet image, hardening-check.sh decides whether anyone notices if it does
+# not, and docker_entrypoint.sh runs at every start. CodeQL does not read shell at all, so
+# ShellCheck covers the part with the most at stake. It earned its place immediately, on an
+# unquoted expansion in the removal script that would have broken on a path with a space in it.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Weekly, because a scanner's rules change even when the code does not.
+    - cron: '17 4 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [javascript-typescript, actions]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: github/codeql-action/init@16df4fbc19aea13d921737a0d5a2dad4ba6e2b76 # v3.30.3
+        with:
+          language: ${{ matrix.language }}
+      - uses: github/codeql-action/analyze@16df4fbc19aea13d921737a0d5a2dad4ba6e2b76 # v3.30.3
+        with:
+          category: /language:${{ matrix.language }}
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Check the shell scripts
+        # Pinned by digest like every other third-party image here. Failing the build rather than
+        # reporting: these scripts are short, they are ours, and there is no backlog to work down.
+        run: |
+          docker run --rm -v "$PWD":/mnt -w /mnt \
+            koalaman/shellcheck@sha256:bb596a0d169b85ddd81d8b6d3a2ff6d5baf5fca10b97f575ebc647c3dff62b3d \
+            hardening-check.sh strip-proot-apps.sh docker_entrypoint.sh
+          echo "shell scripts clean"
