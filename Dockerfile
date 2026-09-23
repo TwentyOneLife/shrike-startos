@@ -104,6 +104,11 @@ RUN \
   DEBIAN_FRONTEND=noninteractive \
   apt-get remove --purge --autoremove -y wget gnupg
 
+# The base image ships a catalogue that installs arbitrary desktop software into this container.
+# See the script for what it removes and why a flag was not enough.
+COPY strip-proot-apps.sh /tmp/strip-proot-apps.sh
+RUN sh /tmp/strip-proot-apps.sh && rm -f /tmp/strip-proot-apps.sh
+
 FROM scratch
 
 COPY --from=buildstage / .
