@@ -28,7 +28,8 @@ follows from it.
    that were tried and reverted.
 2. **Release plumbing: done and proven.** A tag builds, signs the checksums and verifies that
    signature against the published key before publishing, checked end to end on a throwaway tag.
-   Releases are marked prerelease until the two open gates below are closed.
+   Releases are published rather than marked prerelease. What is not yet tested is named at the
+   top of the release notes, which is where someone deciding whether to install it will read it.
 3. **Offer the streaming measurement upstream.** The package this was forked from streams the whole
    screen at a fixed rate: measured on their own image with a browser watching, 73.7 percent of a
    CPU core against 13.1 percent with that off. Neither costs anything when nobody is watching. A
