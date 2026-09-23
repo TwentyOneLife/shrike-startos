@@ -37,8 +37,16 @@ and they are not fixable downstream, so rather than hide them:
 - The advisories are denial of service through pathological input to a brace-expansion routine used
   by a linter that never runs here.
 
-The fix belongs in the SDK. Until it lands, these stay visible rather than suppressed: an ignore
-rule would also hide the day it becomes fixable.
+The fix belongs in the SDK, and it has been reported there so it can be fixed rather than only
+managed here.
 
-`js-yaml` advisories previously appeared here too. Those were real and are fixed: the dependency was
-declared and never imported, so it was removed.
+**These alerts are dismissed rather than left open**, as `not_used`, with the reasoning above
+recorded on each one. An earlier version of this file said the opposite, that they would stay
+visible because an ignore rule also hides the day something becomes fixable. Looking at the actual
+paths changed the answer: every one is a linter's dependency inside a bundled tree, and a security
+page that is permanently red is a page people stop reading. Dismissal is per advisory, so a new one,
+or the same code appearing somewhere that ships, raises a new alert rather than being silently
+covered by this decision.
+
+`js-yaml` advisories previously appeared here for a second reason, a dependency this package
+declared and never imported. That one was real and is fixed by removing it.
