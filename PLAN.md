@@ -26,9 +26,10 @@ follows from it.
    streaming technology, which changes the image and not the package.
 2. **Release plumbing.** A tag builds, signs and verifies a release. The signing secrets are not set
    yet, so a tag would fail until they are.
-3. **Offer the idle-CPU finding upstream.** The package this was forked from streams the whole
-   screen 60 times a second whether or not anything changed: 60 to 75 percent of a CPU core with no
-   browser attached, against 2.5 percent with that off.
+3. **Offer the streaming measurement upstream.** The package this was forked from streams the whole
+   screen at a fixed rate: measured on their own image with a browser watching, 73.7 percent of a
+   CPU core against 13.1 percent with that off. Neither costs anything when nobody is watching. A
+   fair trade for a desktop, a poor one for a wallet on a server.
 4. **Build for arm64.** The image is x86_64 only; the architecture mapping is already in place.
 5. **Prove a wallet syncs end to end**, including across the chain's activation height. This waits
    on a server with a full index.
