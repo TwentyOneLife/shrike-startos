@@ -35,8 +35,9 @@ money in it.
   third party. The switch that is meant to hide it takes effect only after the client and server
   finish a handshake, so the panel is live in the meantime. `strip-proot-apps.sh` takes it out of
   the image and fails the build if a base update moves it.
-- **One server:** Shulcrum, required and connected automatically. The chain has no public Electrum
-  servers, and the servers for Bitcoin cannot read it.
+- **One server:** Shulcrum, required and connected automatically. Shrike ships no public server
+  list for this chain, and a server for Bitcoin cannot read it, so there is nothing sensible to
+  offer as a default except your own.
 
 ## Releases
 
