@@ -36,6 +36,13 @@ export const createDefaultStore = async (effects: T.Effects) => {
 
   // config file does not exist, create it
   console.log('no settings yet, writing the defaults')
+  // Tor only if it is there. Seeding `tor` unconditionally made an optional dependency a required
+  // one the moment the package was installed: the manifest says optional, the store said tor, and
+  // dependencies.ts then demanded a running tor the user never asked for. The dynamic default in
+  // the settings form could not correct it either, because the form is prefilled from the store.
+  const proxy = (await effects.getInstalledPackages()).includes('tor')
+    ? ('tor' as const)
+    : ('none' as const)
   await store.write(effects, {
     title: 'Shrike',
     username: 'shrike',
@@ -43,7 +50,7 @@ export const createDefaultStore = async (effects: T.Effects) => {
     forceSoftwareRendering: false,
     shrike: {
       proxy: {
-        type: 'tor',
+        type: proxy,
       },
     },
   })

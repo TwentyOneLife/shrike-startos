@@ -35,7 +35,10 @@ export const inputSpec = InputSpec.of({
     default: { charset: 'a-z,0-9', len: 20 },
     placeholder: '',
     masked: true,
-    minLength: 8,
+    // This gate is HTTP Basic auth in front of a wallet that holds keys, and the interface may be
+    // reachable over Tor. Eight characters is a rule for a login that locks out; this one does not.
+    // The generated value is twenty and is the one to keep.
+    minLength: 16,
   }),
   enableWayland: Value.toggle({
     name: i18n('Enable Wayland'),

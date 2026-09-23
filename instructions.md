@@ -9,14 +9,25 @@ A wallet with its keys on an always-on machine is a hot wallet. Whoever reaches 
 controls the money in it.
 
 - **Use a watch-only wallet here** and sign transactions on a hardware wallet or an offline
-  computer, moving them as files. This package cannot use a USB hardware wallet directly, because
-  nothing is passed through from the server.
-- **Reach it over Tor,** or over your local network, rather than exposing it to the internet.
-- **Set a strong interface password**, in Settings. It is what stands between a browser and your
-  wallet.
-- **Your backups contain your wallets.** A StartOS backup of this package includes the wallet files.
-- **Signatures made here can be replayed on Bitcoin** unless the transaction opts out. That is a
-  property of the chain, not of this package.
+  computer. This package cannot use a USB hardware wallet directly, because nothing is passed
+  through from the server. Moving an unsigned transaction out and a signed one back in is not yet a
+  tested path in this package, so treat it as unproven rather than routine.
+- **Reach it over your local network, or over Tor.** The interface is served over a Tor address if
+  you add one, and that has been tested only as far as the page loading: whether the desktop itself
+  renders in Tor Browser on its default settings is still unverified.
+- **Keep the password the Settings action generates.** It is twenty characters, and the check in
+  front of the interface is HTTP Basic auth over the connection StartOS provides. That is a lock on
+  a door, not a vault: it does not rate limit and it does not lock out, so a short password is worth
+  little and the interface does not belong on the open internet.
+- **Set a password on the wallet itself** when you create it. That is what protects a wallet file
+  that leaves this machine, in a backup or otherwise. The interface password protects the session;
+  the wallet password protects the file.
+- **Your backups contain your wallets,** and also the interface password, which is stored in plain
+  text in this package's settings file. Treat a backup of this service as you would treat the wallet.
+- **Replay between the chains is about coins older than the fork.** A transaction spending coins
+  that existed before the fork can be valid on both chains, in either direction. Coins received
+  after it exist on one chain only and cannot be replayed. Shrike carries opt-in protection for the
+  case that matters; check the signing screen when you spend pre-fork coins.
 
 If you want a wallet that holds savings, run Shrike on your own computer instead and point it at
 Shulcrum on this server. That path needs no package at all.

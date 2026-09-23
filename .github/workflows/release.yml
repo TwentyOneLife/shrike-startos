@@ -3,12 +3,12 @@ on:
   push:
     tags: ["v*"]
 
-permissions:
-  contents: write
-
 jobs:
   release:
     runs-on: ubuntu-latest
+    # On the job rather than the workflow, so the scope is stated where it is used.
+    permissions:
+      contents: write
     steps:
       # Pinned to a commit rather than a tag. A tag moves, and a moving third-party action is an
       # unpinned dependency with write access to the build.
@@ -16,6 +16,30 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
+
+      # A tag does not run CI, so a release built from a branch that never reached main would
+      # otherwise publish unchecked. These are the same checks, run here rather than trusted.
+      - name: Install
+        run: npm ci
+
+      - name: Formatting and types
+        run: |
+          npx prettier --check startos
+          npx tsc --noEmit
+
+      - name: The wallet's signing key is the one we vendored
+        run: |
+          set -euo pipefail
+          gpg --show-keys --with-colons keys/privkeyio-signing-key.asc \
+            | awk -F: '/^fpr:/ {print $10; exit}' > /tmp/fpr
+          echo "A47D99B6DB0D715D40C59A2023AE8A8EA7E24E38" | diff -u - /tmp/fpr
+
+      - name: Guard against infra leakage
+        run: |
+          if git grep -nIE '192\.168\.[0-9]|(^|[^0-9.])10(\.[0-9]{1,3}){3}|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]|/home/|/data/|[a-z2-7]{16,56}\.onion' -- . ':!.github/workflows/ci.yml'; then
+            echo "Internal infrastructure reference found; see above."
+            exit 1
+          fi
 
       # The same action CI runs, so a release cannot be built by a path that has never been
       # exercised. This job previously did none of it: no start-cli, no workspace, no buildx driver
