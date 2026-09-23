@@ -22,6 +22,11 @@ money in it.
   `keys/`, matched by full fingerprint. No key is fetched from the network while the image builds.
 - **The session is a wallet, not a desktop.** No terminal, no file manager, no editor, and sudo is
   disabled.
+- **The base image's application catalogue is removed**, not hidden. It installs arbitrary desktop
+  software into the container that holds the wallet's files, and its panel fetches a listing from a
+  third party. The switch that is meant to hide it takes effect only after the client and server
+  finish a handshake, so the panel is live in the meantime. `strip-proot-apps.sh` takes it out of
+  the image and fails the build if a base update moves it.
 - **One server:** Shulcrum, required and connected automatically. The chain has no public Electrum
   servers, and the servers for Bitcoin cannot read it.
 

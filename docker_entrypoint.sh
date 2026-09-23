@@ -4,6 +4,13 @@ echo
 echo "Initialising Shrike..."
 echo
 
+# An install that started before the proot-apps catalogue was removed from the image already has
+# the binaries in its home, which is the persistent volume, so an image update never reaches them.
+# Named individually because nothing else in that directory came from the catalogue.
+for leftover in proot-apps proot jq ncat pversion; do
+  rm -f "/config/.local/bin/$leftover"
+done
+
 # always overwrite autostart in case we change it
 if [ "${PIXELFLUX_WAYLAND}" = "true" ]; then
   mkdir -p /config/.config/labwc
