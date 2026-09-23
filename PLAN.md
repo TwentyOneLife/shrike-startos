@@ -21,9 +21,15 @@ follows from it.
 ## Next
 
 1. **Prove the wallet renders in Tor Browser.** The interface is served over Tor and refuses
-   connections without its password, both confirmed. What is unconfirmed is that the streaming
-   client renders in Tor Browser on default settings. If it does not, the fallback is a different
-   streaming technology, which changes the image and not the package.
+   connections without its password, both confirmed. It did **not** render: Tor Browser withholds
+   the WebCodecs API to resist fingerprinting, and the Selkies 1.x client refused to start without
+   it. The image now runs Selkies 2, which sends JPEG frames instead of failing, and the wallet
+   paints in a browser with that resistance switched on, verified by reading the canvas and by a
+   screenshot. See `docs/design/selkies-2.md`.
+
+   What remains is the part no local test can stand in for: **that it is usable over the real onion
+   address**, where the latency is. Tied to it, because the signing path depends on it, is whether
+   an animated QR code stays legible through the stream. Both are hand tests over Tor.
 2. **Release plumbing: done and proven.** A tag builds, signs the checksums and verifies that
    signature against the published key before publishing, checked end to end on a throwaway tag.
    Releases are marked prerelease until the two open gates below are closed.

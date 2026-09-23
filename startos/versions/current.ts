@@ -9,10 +9,10 @@ export const current = VersionInfo.of({
   // Flavored, as Shulcrum's package is: this is a wallet for one chain, and the flavor is what
   // stops it satisfying anything that wanted Sparrow on Bitcoin. The number tracks Shrike's
   // upstream version; the revision after it is this package's own.
-  version: '#blake:2.5.5:1',
+  version: '#blake:2.5.5:2',
   releaseNotes: {
     en_US:
-      'The wallet no longer encodes its screen while nothing is happening, which cost most of a CPU core on an idle server. The Electrum check now waits for Shulcrum rather than reporting a failure while it is stopped or still building its index.',
+      'The wallet now renders in Tor Browser, which it did not before: that browser withholds the WebCodecs API to resist fingerprinting, and the previous streaming client refused to start without it. The base image moves to Selkies 2, which sends JPEG frames instead of failing. The application catalogue inherited from that base image, which could install arbitrary software into the container holding your wallet files, has been removed. Audio is switched off; a wallet has nothing to say.',
   },
   migrations: {
     up: async ({ effects }) => {},
