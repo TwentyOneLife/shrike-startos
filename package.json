@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@start9labs/start-sdk": "2.0.9",
-    "js-yaml": "^4.1.1",
+    "js-yaml": "^4.3.2",
     "tor-startos": "github:Start9Labs/tor-startos#801070530453e73f143bfce2fcfb27988b962f03"
   },
   "devDependencies": {
