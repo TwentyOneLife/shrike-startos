@@ -50,8 +50,14 @@ rm -rf /proot-apps /usr/local/bin/selkies-proot
 #    the panel at a path served by our own nginx stops the request leaving the machine at all,
 #    including in the window before the server's settings arrive.
 for dashboard in $DASHBOARDS; do
-  bundle=$(grep -rl "$CATALOGUE_URL" "$dashboard/assets") ||
-    { echo "catalogue URL not found in $dashboard"; exit 1; }
-  sed -i "s#$CATALOGUE_URL#/proot-apps-removed/#g" $bundle
+  found=0
+  # One file per iteration rather than an unquoted expansion of several: grep may name more than
+  # one bundle, and splitting its output on whitespace works only for as long as no path contains
+  # any. That is a bet on a base image we do not control.
+  grep -rl "$CATALOGUE_URL" "$dashboard/assets" | while IFS= read -r bundle; do
+    sed -i "s#$CATALOGUE_URL#/proot-apps-removed/#g" "$bundle"
+  done
+  grep -rq "$CATALOGUE_URL" "$dashboard/assets" || found=1
+  [ "$found" -eq 1 ] || { echo "catalogue URL still in $dashboard after rewriting"; exit 1; }
 done
 ! grep -rq "$CATALOGUE_URL" /usr/share/selkies || { echo "catalogue URL survives"; exit 1; }
