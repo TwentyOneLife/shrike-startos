@@ -86,11 +86,14 @@ jobs:
       - name: Publish release
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
-          # A prerelease until this package has been proven in the two places it has not: a wallet
-          # synced end to end against a server with a full index, and the desktop rendering in Tor
-          # Browser, which is how the interface is meant to be reached from outside a LAN. Marking
-          # it otherwise would say a thing about it that nobody has checked.
-          prerelease: true
+          # Published as a release rather than a prerelease. The Tor gate that justified the label
+          # is closed: the wallet renders and is usable over an onion address. What remains untested
+          # is a wallet synced end to end against a fully indexed server, which we cannot do because
+          # our own index is still building, and that is stated at the top of the release notes
+          # rather than encoded in a label most people never see. A prerelease is also invisible in
+          # the repository's own sidebar, which made a published package look unpublished.
+          prerelease: false
+          make_latest: true
           files: |
             *.s9pk
             SHA256SUMS
