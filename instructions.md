@@ -12,9 +12,10 @@ controls the money in it.
   computer. This package cannot use a USB hardware wallet directly, because nothing is passed
   through from the server. Moving an unsigned transaction out and a signed one back in is not yet a
   tested path in this package, so treat it as unproven rather than routine.
-- **Reach it over your local network, or over Tor.** The interface is served over a Tor address if
-  you add one, and that has been tested only as far as the page loading: whether the desktop itself
-  renders in Tor Browser on its default settings is still unverified.
+- **Reach it over your local network, or over Tor.** Both work, and the wallet has been used over a
+  Tor address in Tor Browser on its default settings. Expect it to feel slower there: the stream
+  falls back to sending images rather than video, because Tor Browser withholds the interface that
+  video needs, and an onion circuit is not fast. Over a local network it is comfortable.
 - **Keep the password the Settings action generates.** It is twenty characters, and the check in
   front of the interface is HTTP Basic auth over the connection StartOS provides. That is a lock on
   a door, not a vault: it does not rate limit and it does not lock out, so a short password is worth
@@ -49,9 +50,11 @@ whether the wallet can see the chain, not merely what it is configured to use.
 
 ## While Shulcrum is still indexing
 
-Shulcrum answers wallet queries only once it has finished building its index, which takes days on a
-first run. Until then this wallet will show as disconnected, and the health check will say so. That
-is expected, and nothing here needs changing while you wait.
+Shulcrum does not open its Electrum port at all until its index has caught up, which takes days on
+a first run. Until then this wallet shows as disconnected and the health check says so, and a
+connection test reports the connection being refused rather than anything more specific. That is
+expected, it is the server not listening yet rather than anything misconfigured here, and nothing
+needs changing while you wait.
 
 ## Limitations
 

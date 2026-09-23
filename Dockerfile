@@ -112,6 +112,12 @@ RUN \
   # shell in a container holding wallet files is worth much less without them. Nothing here reaches
   # them without code execution in the session, so this is hardening rather than a fix, but it is
   # the same reasoning that removed the application catalogue's own netcat.
+  #
+  # The terminals, because DISABLE_TERMINALS does not remove one, it chmods it to 0000, which is a
+  # weaker thing than the README claimed and is undone by anything running as root. There are three
+  # of them and removing one promotes the next: taking out xterm moved x-terminal-emulator on to
+  # foot. Worse, the base image's own disable list misses footclient, which it leaves executable.
+  # Removing the packages is what makes the claim true.
   rm -rf /root/.gnupg && \
   DEBIAN_FRONTEND=noninteractive \
   apt-get remove --purge --autoremove -y \
@@ -119,7 +125,10 @@ RUN \
     gpg \
     netcat-openbsd \
     openssh-client \
-    wget
+    foot \
+    stterm \
+    wget \
+    xterm
 
 # The base image ships a catalogue that installs arbitrary desktop software into this container.
 # See the script for what it removes and why a flag was not enough.

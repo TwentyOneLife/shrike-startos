@@ -20,16 +20,12 @@ follows from it.
 
 ## Next
 
-1. **Prove the wallet renders in Tor Browser.** The interface is served over Tor and refuses
-   connections without its password, both confirmed. It did **not** render: Tor Browser withholds
-   the WebCodecs API to resist fingerprinting, and the Selkies 1.x client refused to start without
-   it. The image now runs Selkies 2, which sends JPEG frames instead of failing, and the wallet
-   paints in a browser with that resistance switched on, verified by reading the canvas and by a
-   screenshot. See `docs/design/selkies-2.md`.
-
-   What remains is the part no local test can stand in for: **that it is usable over the real onion
-   address**, where the latency is. Tied to it, because the signing path depends on it, is whether
-   an animated QR code stays legible through the stream. Both are hand tests over Tor.
+1. **The wallet renders over Tor: done.** It did not, at first. Tor Browser withholds the WebCodecs
+   API to resist fingerprinting and the Selkies 1.x client refused to start without it. The image
+   runs Selkies 2, which sends JPEG frames instead of failing. Proven over a real onion address, and
+   then tuned for it: left alone the client asked for 2800x1200 at 60 frames a second, which no
+   onion circuit carries. See `docs/design/selkies-2.md` for the measurements and for two things
+   that were tried and reverted.
 2. **Release plumbing: done and proven.** A tag builds, signs the checksums and verifies that
    signature against the published key before publishing, checked end to end on a throwaway tag.
    Releases are marked prerelease until the two open gates below are closed.
@@ -39,12 +35,19 @@ follows from it.
    fair trade for a desktop, a poor one for a wallet on a server.
 4. **Build for arm64.** The image is x86_64 only; the architecture mapping is already in place.
 5. **Prove a wallet syncs end to end**, including across the chain's activation height. This waits
-   on a server with a full index.
+   on a server with a full index, which is the one thing here that cannot be hurried. Everything
+   short of it is proven: the wallet reaches the configured server, completes a protocol 1.8
+   handshake, subscribes to its addresses, and verifies proof of work on the header it is given.
 
 ## Not planned
 
 - A wallet with its own web interface. Shrike is a desktop application and this packages it as one.
-- Hardware wallet support. Nothing is passed through from the server, so signing belongs on the
-  machine holding the device.
+- **USB hardware wallet support.** Nothing is passed through from the server, so a device plugged
+  into your computer cannot be reached from a wallet running on the server.
+
+  Signing with an airgapped device is a different matter and **is** the intended path: the wallet
+  draws a QR code on its own desktop and the stream carries it to the screen a signer is pointed at.
+  The return leg, getting a signed transaction back without a camera on the server, is designed but
+  not yet proven, and `instructions.md` says so rather than implying it is routine.
 
 License: GPLv3. Shrike itself is Apache-2.0.
