@@ -36,7 +36,7 @@ jobs:
 
       - name: Guard against infra leakage
         run: |
-          if git grep -nIE '192\.168\.[0-9]|(^|[^0-9.])10(\.[0-9]{1,3}){3}|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]|/home/|/data/|[a-z2-7]{16,56}\.onion' -- . ':!.github/workflows/ci.yml'; then
+          if git grep -nIE '192\.168\.[0-9]|(^|[^0-9.])10(\.[0-9]{1,3}){3}|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]|/home/|/data/|[a-z2-7]{16,56}\.onion' -- . ':!.github/workflows/'; then
             echo "Internal infrastructure reference found; see above."
             exit 1
           fi

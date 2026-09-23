@@ -124,7 +124,7 @@ runs:
           printf '%s' "$S9PK_BUILD_KEY" > "$ws/.startos/build.key.pem"
         elif [ "$ACTOR" = "dependabot[bot]" ] || [ "$ALLOW_THROWAWAY_KEY" = "true" ]; then
           echo "::warning::No signing key on this run. Generating a throwaway key: this build"
-          echo "::warning::proves the package still packs, and its artifact is not publishable.""
+          echo "::warning::proves the package still packs, and its artifact is not publishable."
           # init-workspace rather than openssl or node, because the key format is not the obvious
           # one: it is Ed25519 in PKCS#8 **version 1**, carrying the public key alongside the
           # private one, where both `openssl genpkey` and node's default export produce version 0.
