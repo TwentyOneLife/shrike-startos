@@ -12,7 +12,7 @@ export const current = VersionInfo.of({
   version: '#blake:2.5.5:10',
   releaseNotes: {
     en_US:
-      "The wallet no longer routes its connection to Shulcrum through a proxy. It did when Tor was installed, which was this package's own default, and that could never work: Shulcrum answers on a private address on the same server, and Tor refuses private addresses. Measured on a node, the same address answered directly and failed through the proxy in the same breath. The proxy setting is gone rather than defaulted off, because nothing else this wallet does leaves the machine.",
+      'Removes things this package had no use for. Tools the base image left in the container that a wallet never needs: ssh, scp, netcat and gpg. None was reachable without code execution inside the session, so this is hardening rather than a fix, but a container holding wallet files is worth less to an attacker without them. Also a dependency that was declared and never imported, which carried security advisories with it. Neither changes how the wallet behaves.',
   },
   migrations: {
     up: async ({ effects }) => {},
