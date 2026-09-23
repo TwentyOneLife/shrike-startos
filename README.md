@@ -25,6 +25,11 @@ money in it.
 - **One server:** Shulcrum, required and connected automatically. The chain has no public Electrum
   servers, and the servers for Bitcoin cannot read it.
 
+## Releases
+
+Releases are signed. [`docs/verifying-a-release.md`](docs/verifying-a-release.md) explains how to
+check one, and why the two signatures a package carries answer different questions.
+
 ## Design
 
 `docs/design/shrike-web-app.md` records what was decided and why, including what was rejected.
