@@ -106,3 +106,34 @@ is worth knowing on a machine that also runs a node.
 - Unchanged and still to be proven by hand over the real onion, because no local stand-in carries
   Tor's latency: that the wallet is usable there, and that an animated QR stays legible through the
   stream, which is what the signing path depends on.
+
+## Addendum, measured over Tor
+
+The first build rendered over Tor and was slow enough to be unpleasant: menus lagged and typing ran
+seconds behind. The node's log named the cause without ambiguity.
+
+```
+Stream settings active -> Res: 2800x1200 | FPS: 60.0 | Stripes: 4 | Mode: JPEG | Quality: 60
+Backpressure TRIGGERED for 'primary'. S:3086, C:957 (EffDesync:19.0f > Allowed:16.0f)
+```
+
+The client asked for a HiDPI screen at sixty frames a second, the circuit carried a fraction of it,
+and the server spent its time triggering and lifting backpressure while a queue of frames built up.
+A keystroke waited behind that queue rather than behind the round trip alone. The node itself was
+idle throughout, so this was never a question of CPU.
+
+Two settings answer it. A framerate ceiling of 15, and `use_css_scaling`, which sends one pixel per
+CSS pixel rather than one per device pixel and lets the canvas stretch. Measured on the same image
+afterwards: 1280x900 at 15 fps, roughly twelve times fewer pixels per second. Neither is locked,
+because a local network has the bandwidth for more and the side menu can raise both.
+
+**Settings are defaults unless they are locked.** Upstream is explicit that clients may override a
+value unless a `|locked` suffix is given, and it is easy to ship a switch that does nothing. Proven
+on this image: with audio off but unlocked, the side menu still offered a working "Enable Audio
+Stream" button; locked, the button is gone. Audio, microphone and gamepad are locked here for that
+reason. The gamepad *toggle* is still drawn either way, so the honest claim is that the server
+refuses gamepads rather than that the button is gone.
+
+This is the same lesson as the application catalogue, in a second place: a setting that the page
+applies is a rendering default, not a control. Treat anything that matters as needing either a lock
+or removal from the image.

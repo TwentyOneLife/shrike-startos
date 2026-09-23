@@ -154,14 +154,30 @@ ENV \
   # this encodes what changes instead. Selkies 2.0 made this its own default; it stays here because
   # a squashed image inherits no environment and because the reason is worth keeping written down.
   SELKIES_VIDEO_STREAMING_MODE=false \
+  # Tuned for an onion circuit, because that is how this package is meant to be reached. Left at
+  # its defaults the client asked for 2800x1200 at 60 fps, which is a browser reporting a HiDPI
+  # screen and taking the framerate on offer. Measured on the node against Tor Browser: the server
+  # had sent 3086 frames while the browser had confirmed 957, and backpressure triggered and lifted
+  # every few seconds without pause. Typing waited behind that queue.
+  #
+  # A framerate ceiling and CSS scaling together cut the pixels-per-second by roughly sixteen. A
+  # wallet is a static window whose content changes when someone types, so the framerate buys
+  # nothing here that latency does not take back. Neither value is locked: a LAN has the bandwidth
+  # for more, and the side menu can raise both.
+  SELKIES_FRAMERATE="8-15" \
+  SELKIES_USE_CSS_SCALING=true \
   # A wallet has nothing to say. Audio also fails outright in a browser that resists fingerprinting,
   # where AudioDecoder is withheld along with the rest of WebCodecs, so leaving it on means a worker
   # throwing on repeat for a feature nobody wants.
-  SELKIES_AUDIO_ENABLED=false \
-  SELKIES_MICROPHONE_ENABLED=false \
+  #
+  # Locked, not merely set. An unlocked setting is a default the page may override, which is
+  # upstream's documented behaviour and easy to miss: with this off but unlocked, the side menu
+  # still offers an "Enable Audio Stream" button that works. Locking removes it.
+  SELKIES_AUDIO_ENABLED="false|locked" \
+  SELKIES_MICROPHONE_ENABLED="false|locked" \
   SELKIES_UI_SIDEBAR_SHOW_APPS=false \
   SELKIES_UI_SIDEBAR_SHOW_GAMEPADS=false \
-  SELKIES_GAMEPAD_ENABLED=false \
+  SELKIES_GAMEPAD_ENABLED="false|locked" \
   NO_GAMEPAD=true \
   PIXELFLUX_WAYLAND=true \
   NO_FULL=1 \
