@@ -20,8 +20,11 @@ money in it.
   registry, so the package can be rebuilt from what it publishes.
 - **The wallet's release is verified before it is installed**, against the signing key committed in
   `keys/`, matched by full fingerprint. No key is fetched from the network while the image builds.
-- **The session is a wallet, not a desktop.** No terminal, no file manager, no editor, and sudo is
-  disabled.
+- **The session is a wallet, not a desktop.** No file manager, no editor, and no terminal: all
+  three terminal emulators the base image carries are removed. That distinction is deliberate. The
+  base image's own switch chmods a terminal to `0000` rather than removing it, which anything
+  running as root undoes, it promotes the next terminal when one goes, and it misses `footclient`
+  entirely. Sudo is still present and disabled the base image's way, by permission.
 - **Tools a wallet has no use for are removed from the image**: ssh, scp, netcat, gpg and wget. They
   came with the base image. None is reachable without code execution inside the session, so this is
   hardening rather than a fix, but a container holding wallet files is worth less without them.
@@ -41,6 +44,9 @@ check one, and why the two signatures a package carries answer different questio
 ## Design
 
 `docs/design/shrike-web-app.md` records what was decided and why, including what was rejected.
+`docs/design/selkies-2.md` covers how the wallet is streamed to a browser: why it could not render
+in Tor Browser at all, what was measured to make it usable there, and two changes that were tried
+and reverted, with the reasons, so they are not tried again.
 
 ## Building
 
