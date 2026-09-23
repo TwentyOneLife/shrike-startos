@@ -1,12 +1,7 @@
-import { store } from './fileModels/store.yaml'
 import { sdk } from './sdk'
 import { shulcrumPackageId } from './utils'
 
-export const setDependencies = sdk.setupDependencies(async ({ effects }) => {
-  const conf = await store.read().const(effects)
-
-  const useTor = conf?.shrike.proxy.type === 'tor'
-
+export const setDependencies = sdk.setupDependencies(async () => {
   return {
     // Required, not optional: this wallet reads one chain and Shulcrum is what serves it. Running
     // rather than merely installed, because a stopped server is a wallet that cannot see its
@@ -21,14 +16,5 @@ export const setDependencies = sdk.setupDependencies(async ({ effects }) => {
       versionRange: '>=2.1.2:0',
       healthChecks: [],
     },
-    ...(useTor
-      ? {
-          tor: {
-            kind: 'running',
-            versionRange: '>=0.4.9.5:0',
-            healthChecks: [],
-          },
-        }
-      : {}),
   } as const
 })
