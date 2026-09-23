@@ -150,7 +150,15 @@ Pinned to 1920x1080 with `manual_resolution`, the window becomes a viewport onto
 rather than a command to reshape it. Verified against a 1400x120 viewport: the client reports
 `Manual Mode: true` and the server holds `Res: 1920x1080`, where before it would have followed.
 
-1920x1080 because that is the size desktop software is laid out for, so no dialog arrives clipped.
-It costs more than a smaller desktop on a slow link, though less than the area difference suggests,
-since only damaged regions are encoded and a wallet is mostly still. The second benefit is quieter
-and possibly larger: a dragged window edge no longer re-encodes the whole screen.
+The second benefit is quieter and possibly larger: a dragged window edge no longer re-encodes the
+whole screen.
+
+**The size was wrong at first, and the correction is the point.** Pinned at 1920x1080 on the
+reasoning that it is what desktop software is laid out for. Measured over Tor immediately
+afterwards: `S:1091, C:174`, the server a thousand frames ahead of the browser, and timing the
+recovery between two log lines the circuit was delivering about 2.5 frames a second against the 15
+being produced. That is 2.07 megapixels a frame where the working configuration had been 1.02. The
+size argument was sound and irrelevant; the bandwidth had already been measured an hour earlier and
+was not consulted. Pinned at 1280x800 instead, which is a normal desktop size, lays dialogs out
+fine, and costs what the link can carry. Size is paid for on every frame: decide it against the
+measurement, not against what desktops usually are.
