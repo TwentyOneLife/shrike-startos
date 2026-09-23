@@ -54,37 +54,6 @@ export const inputSpec = InputSpec.of({
     ),
     default: false,
   }),
-  shrike: Value.object(
-    {
-      name: 'Wallet settings',
-      description: 'How Shrike reaches the chain',
-    },
-    InputSpec.of({
-      proxy: Value.dynamicUnion(async ({ effects }) => {
-        const torInstalled = (await effects.getInstalledPackages()).includes(
-          'tor',
-        )
-        return {
-          name: 'Proxy',
-          // Shrike's own outbound connections, not how you reach this interface. The Electrum
-          // server is on this box, so this matters for the few things the wallet fetches itself.
-          description: 'Proxy for connections the wallet makes itself',
-          default: torInstalled ? 'tor' : 'none',
-          disabled: [],
-          variants: Variants.of({
-            tor: {
-              name: 'Tor (recommended)',
-              spec: InputSpec.of({}),
-            },
-            none: {
-              name: 'None',
-              spec: InputSpec.of({}),
-            },
-          }),
-        }
-      }),
-    }),
-  ),
 })
 
 export const config = sdk.Action.withInput(
@@ -129,11 +98,6 @@ async function readSettings(effects: T.Effects): Promise<PartialInputSpec> {
     password: settings.password,
     enableWayland: settings.enableWayland,
     forceSoftwareRendering: settings.forceSoftwareRendering,
-    shrike: {
-      proxy: {
-        selection: settings.shrike.proxy.type as 'tor' | 'none',
-      },
-    },
   }
 }
 
@@ -144,10 +108,5 @@ async function writeSettings(effects: T.Effects, input: InputSpec) {
     password: input.password,
     enableWayland: input.enableWayland,
     forceSoftwareRendering: input.forceSoftwareRendering,
-    shrike: {
-      proxy: {
-        type: input.shrike.proxy.selection,
-      },
-    },
   })
 }

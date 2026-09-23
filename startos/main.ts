@@ -1,4 +1,3 @@
-import { socksHostId, socksPort } from 'tor-startos/startos/utils'
 import { sdk } from './sdk'
 import {
   shulcrumHostId,
@@ -30,18 +29,6 @@ export const main = sdk.setupMain(async ({ effects }) => {
       internalPort: shulcrumPort,
     })
     .const()
-
-  const proxyAddress =
-    conf.shrike.proxy.type === 'tor'
-      ? await sdk.host
-          .getBridgeAddress(effects, {
-            packageId: 'tor',
-            hostId: socksHostId,
-            internalPort: socksPort,
-            fallbackPort: socksPort,
-          })
-          .const()
-      : null
 
   const subcontainer = await sdk.SubContainer.eager(
     effects,
@@ -83,9 +70,12 @@ export const main = sdk.setupMain(async ({ effects }) => {
     await shrike.merge(effects, {
       serverType: 'ELECTRUM_SERVER',
       electrumServer: `tcp://${shulcrumAddress}`,
-      ...(proxyAddress
-        ? { useProxy: true, proxyServer: proxyAddress }
-        : { useProxy: false }),
+      // Never proxied. Shulcrum answers on a private address on this box, and Tor's SOCKS port
+      // refuses private addresses: measured on a node, the same address answered directly and
+      // failed through the proxy in the same breath. Nothing else this wallet does goes out, since
+      // the block explorer and the exchange rate source are both off, so a proxy here could only
+      // ever break the one connection that matters.
+      useProxy: false,
     })
   }
 
