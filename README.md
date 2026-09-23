@@ -1,7 +1,9 @@
 # shrike-startos
 
-[Shrike](https://github.com/privkeyio/shrike), a wallet for the Bitcoin Blake2b chain, packaged for
-StartOS as a desktop you reach from a browser.
+[Shrike](https://shrikewallet.com/), a wallet for the Bitcoin Blake2b chain, packaged for StartOS as
+a desktop you reach from a browser. The wallet itself is developed at
+[`privkeyio/shrike`](https://github.com/privkeyio/shrike); this repository packages it and is not
+affiliated with or endorsed by its authors.
 
 Forked from [`remcoros/sparrow-webtop-startos`](https://github.com/remcoros/sparrow-webtop-startos),
 which does the same for Sparrow on Bitcoin. Their work is what made this a small change rather than
