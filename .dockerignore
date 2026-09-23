@@ -1,0 +1,13 @@
+# The image build needs the key it verifies with and the desktop overlay, and nothing else here.
+# Without this the whole working tree, .git included, is sent as build context.
+.git/
+.github/
+node_modules/
+javascript/
+docs/
+test/
+assets/
+*.s9pk
+*.md
+**/*.orig
+**/*.rej

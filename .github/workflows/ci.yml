@@ -3,6 +3,12 @@ on:
   pull_request:
   push:
     branches: [main]
+    tags: ['v*']
+
+# Least privilege by declaration rather than by the repository's current default, which is one
+# settings change away from being something else.
+permissions:
+  contents: read
 
 jobs:
   validate:
@@ -44,10 +50,15 @@ jobs:
       - uses: ./.github/actions/build-s9pk
         with:
           s9pk-build-key: ${{ secrets.S9PK_BUILD_KEY }}
+          # A pull request may build without a key, so a fork's or Dependabot's build still proves
+          # the package packs. Nothing else may: see the action's input.
+          allow-throwaway-key: ${{ github.event_name == 'pull_request' }}
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: s9pk
+          # Named for what it is: a build that may carry a throwaway signature, which must never be
+          # installed in the belief that it is a release.
+          name: s9pk-unsigned-ci
           path: '*.s9pk'
           if-no-files-found: error
 
@@ -57,7 +68,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Guard against infra leakage
         run: |
-          if git grep -nIE '192\.168\.[0-9]|(^|[^0-9.])10(\.[0-9]{1,3}){3}|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]|/home/|/data/|[a-z2-7]{16,56}\.onion' -- . ':!.github/workflows/ci.yml'; then
+          if git grep -nIE '192\.168\.[0-9]|(^|[^0-9.])10(\.[0-9]{1,3}){3}|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]|/home/|/data/|[a-z2-7]{16,56}\.onion' -- . ':!.github/workflows/'; then
             echo "Internal infrastructure reference found; see above."
             exit 1
           fi

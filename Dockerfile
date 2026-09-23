@@ -94,10 +94,15 @@ RUN \
   # matching UID string says nothing about which key signed.
   gpg --status-fd 1 --verify SHA256SUMS.asc SHA256SUMS \
       | grep -q "^\[GNUPG:\] VALIDSIG ${SHRIKE_PGP_FINGERPRINT} " || exit 1 && \
-  sha256sum --check --ignore-missing SHA256SUMS || exit 1 && \
+  sha256sum --check --strict --ignore-missing SHA256SUMS || exit 1 && \
   DEBIAN_FRONTEND=noninteractive \
   apt-get install -y ./shrike_${SHRIKE_DEBVERSION}_${DEB_ARCH}.deb && \
-  rm -f /tmp/shrike* /tmp/SHA256SUMS*
+  rm -f /tmp/shrike* /tmp/SHA256SUMS* && \
+  # A wallet session has no use for a downloader or a keyring, and the verification they were
+  # installed for is done. The GPG home goes with them: it holds the key this build trusted.
+  rm -rf /root/.gnupg && \
+  DEBIAN_FRONTEND=noninteractive \
+  apt-get remove --purge --autoremove -y wget gnupg
 
 FROM scratch
 
@@ -105,7 +110,6 @@ COPY --from=buildstage / .
 
 # restore runtime metadata inherited from the Selkies base image
 ENV \
-  HOME="/root" \
   LANGUAGE="en_US.UTF-8" \
   LANG="en_US.UTF-8" \
   TERM="xterm" \
