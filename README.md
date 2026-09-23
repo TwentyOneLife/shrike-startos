@@ -22,6 +22,9 @@ money in it.
   `keys/`, matched by full fingerprint. No key is fetched from the network while the image builds.
 - **The session is a wallet, not a desktop.** No terminal, no file manager, no editor, and sudo is
   disabled.
+- **Tools a wallet has no use for are removed from the image**: ssh, scp, netcat, gpg and wget. They
+  came with the base image. None is reachable without code execution inside the session, so this is
+  hardening rather than a fix, but a container holding wallet files is worth less without them.
 - **The base image's application catalogue is removed**, not hidden. It installs arbitrary desktop
   software into the container that holds the wallet's files, and its panel fetches a listing from a
   third party. The switch that is meant to hide it takes effect only after the client and server

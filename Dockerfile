@@ -101,11 +101,25 @@ RUN \
   DEBIAN_FRONTEND=noninteractive \
   apt-get install -y ./shrike_${SHRIKE_DEBVERSION}_${DEB_ARCH}.deb && \
   rm -f /tmp/shrike* /tmp/SHA256SUMS* && \
-  # A wallet session has no use for a downloader or a keyring, and the verification they were
-  # installed for is done. The GPG home goes with them: it holds the key this build trusted.
+  # The verification these were installed for is done, and a wallet session has no use for any of
+  # them afterwards. The GPG home goes too: it holds the key this build trusted.
+  #
+  # gpg is named explicitly. Purging gnupg alone left /usr/bin/gpg behind, because that binary
+  # comes from the package `gpg`, so the comment that used to sit here claimed a removal the code
+  # did not perform.
+  #
+  # ssh, scp and netcat are not ours and were never wanted: they came with the base image, and a
+  # shell in a container holding wallet files is worth much less without them. Nothing here reaches
+  # them without code execution in the session, so this is hardening rather than a fix, but it is
+  # the same reasoning that removed the application catalogue's own netcat.
   rm -rf /root/.gnupg && \
   DEBIAN_FRONTEND=noninteractive \
-  apt-get remove --purge --autoremove -y wget gnupg
+  apt-get remove --purge --autoremove -y \
+    gnupg \
+    gpg \
+    netcat-openbsd \
+    openssh-client \
+    wget
 
 # The base image ships a catalogue that installs arbitrary desktop software into this container.
 # See the script for what it removes and why a flag was not enough.
