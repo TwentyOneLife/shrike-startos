@@ -172,12 +172,14 @@ ENV \
   # because a hundred-pixel strip is what was left for it. A wallet that rearranges itself when a
   # pane opens, and re-encodes the screen on every drag of a window edge, is not one to hand anyone.
   #
-  # 1920x1080 because it is the size desktop software is written for, so no dialog arrives clipped.
-  # It costs more than a smaller desktop over a slow link, though less than the area suggests, since
-  # only what changes is encoded and a wallet is mostly still.
+  # 1280x800 because the size has to be paid for every frame. Pinned at 1920x1080 first, on the
+  # reasoning that it is what desktop software is laid out for; measured over Tor, that is 2.07
+  # megapixels against 1.02, and the circuit was delivering about 2.5 frames a second while the
+  # server produced 15. Typing queued behind the difference. A wallet's dialogs lay out fine at
+  # 1280x800, and the pixels not sent are the ones that were making it unusable.
   SELKIES_MANUAL_RESOLUTION=true \
-  SELKIES_MANUAL_WIDTH=1920 \
-  SELKIES_MANUAL_HEIGHT=1080 \
+  SELKIES_MANUAL_WIDTH=1280 \
+  SELKIES_MANUAL_HEIGHT=800 \
   # A wallet has nothing to say. Audio also fails outright in a browser that resists fingerprinting,
   # where AudioDecoder is withheld along with the rest of WebCodecs, so leaving it on means a worker
   # throwing on repeat for a feature nobody wants.
