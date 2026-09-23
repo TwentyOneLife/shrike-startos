@@ -24,8 +24,9 @@ follows from it.
    connections without its password, both confirmed. What is unconfirmed is that the streaming
    client renders in Tor Browser on default settings. If it does not, the fallback is a different
    streaming technology, which changes the image and not the package.
-2. **Release plumbing.** A tag builds, signs and verifies a release. The signing secrets are not set
-   yet, so a tag would fail until they are.
+2. **Release plumbing: done and proven.** A tag builds, signs the checksums and verifies that
+   signature against the published key before publishing, checked end to end on a throwaway tag.
+   Releases are marked prerelease until the two open gates below are closed.
 3. **Offer the streaming measurement upstream.** The package this was forked from streams the whole
    screen at a fixed rate: measured on their own image with a browser watching, 73.7 percent of a
    CPU core against 13.1 percent with that off. Neither costs anything when nobody is watching. A
