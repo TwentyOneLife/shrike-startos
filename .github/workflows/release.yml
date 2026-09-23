@@ -86,6 +86,11 @@ jobs:
       - name: Publish release
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
+          # A prerelease until this package has been proven in the two places it has not: a wallet
+          # synced end to end against a server with a full index, and the desktop rendering in Tor
+          # Browser, which is how the interface is meant to be reached from outside a LAN. Marking
+          # it otherwise would say a thing about it that nobody has checked.
+          prerelease: true
           files: |
             *.s9pk
             SHA256SUMS
