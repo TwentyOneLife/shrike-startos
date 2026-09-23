@@ -62,6 +62,22 @@ jobs:
           path: '*.s9pk'
           if-no-files-found: error
 
+  image-hardening:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      # The image is assembled by removing things from a base image that moves at every digest
+      # bump, and nothing else checks that the removals still remove. That base has already moved
+      # twice in ways that mattered: a helper relocated between Selkies versions, and taking out one
+      # terminal promoted the next into its place. A removal that silently stops removing looks
+      # exactly like one that works, and the README would go on claiming it either way.
+      - name: Build the image
+        run: docker build -t shrike-webtop:check .
+
+      - name: The image is what the README says it is
+        run: sh hardening-check.sh shrike-webtop:check
+
   no-internal-refs:
     runs-on: ubuntu-latest
     steps:
