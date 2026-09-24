@@ -1,1 +1,8 @@
+# The network the wallet runs on, written by the service from its settings. Shrike is one network
+# per process, so this has to be decided before it starts rather than configured inside it.
+if [ -r /config/.shrike-network ]; then
+  SPARROW_NETWORK="$(cat /config/.shrike-network)"
+  export SPARROW_NETWORK
+fi
+
 /opt/shrike/bin/Shrike

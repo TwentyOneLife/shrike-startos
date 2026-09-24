@@ -59,9 +59,37 @@ export const main = sdk.setupMain(async ({ effects }) => {
     ])
   }
 
-  // The wallet arrives connected. A user who has to type a server address into a wallet that is
-  // already running beside one has been handed the packaging problem to solve themselves.
-  if (shulcrumAddress) {
+  // The network is decided here rather than inside the wallet: Shrike runs one chain per process
+  // and reads this before it starts. The session's autostart reads the file and exports
+  // SPARROW_NETWORK from it.
+  const network = conf.network ?? 'mainnet'
+  await subcontainer.exec([
+    'sh',
+    '-c',
+    `printf '%s' ${JSON.stringify(network)} > /config/.shrike-network && chown 1000:1000 /config/.shrike-network`,
+  ])
+
+  // Which server the wallet is pointed at follows the network, and the two cases are genuinely
+  // different rather than two spellings of one thing.
+  //
+  // On mainnet, Shulcrum runs beside this package and the address is known, so the wallet arrives
+  // connected. A user who has to type a server address into a wallet that is already running beside
+  // one has been handed the packaging problem to solve themselves.
+  //
+  // On testnet4, nothing packages a server for this chain yet. We cannot invent an address, so the
+  // person running it supplies one or the wallet starts with none. Saying that plainly is better
+  // than pointing a testnet4 wallet at a mainnet server, which fails in a way that looks like our
+  // bug rather than a missing setting.
+  const server =
+    network === 'testnet4'
+      ? conf.testnet4Server
+        ? `tcp://${conf.testnet4Server}`
+        : null
+      : shulcrumAddress
+        ? `tcp://${shulcrumAddress}`
+        : null
+
+  if (server) {
     await subcontainer.exec([
       'sh',
       '-c',
@@ -69,7 +97,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
     ])
     await shrike.merge(effects, {
       serverType: 'ELECTRUM_SERVER',
-      electrumServer: `tcp://${shulcrumAddress}`,
+      electrumServer: server,
       // Never proxied. Shulcrum answers on a private address on this box, and Tor's SOCKS port
       // refuses private addresses: measured on a node, the same address answered directly and
       // failed through the proxy in the same breath. Nothing else this wallet does goes out, since
