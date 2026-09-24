@@ -45,16 +45,17 @@ jobs:
       # exercised. This job previously did none of it: no start-cli, no workspace, no buildx driver
       # and no squashfs tools, so the first tag would have produced a red release rather than a
       # signed one.
+      # Both architectures in one call, because the manifest declares both and a release missing an
+      # architecture it advertises would be worse than one that took a few minutes longer. `arches`
+      # is the SDK's own target for every architecture the Makefile lists.
+      #
+      # One call rather than two: calling this action twice re-ran its first step, which downloads
+      # start-cli into a fixed path, and `gh release download` refuses to overwrite. That is how the
+      # first two-architecture tag failed. CI does not hit it because its two builds are separate
+      # jobs on separate runners, which is exactly the kind of difference a release finds first.
       - uses: ./.github/actions/build-s9pk
         with:
-          s9pk-build-key: ${{ secrets.S9PK_BUILD_KEY }}
-
-      # Both architectures, because the manifest declares both. The arm64 one is emulated and has
-      # taken between six and nine minutes against about five native. A release missing an
-      # architecture it advertises would be worse than one that took a few minutes longer.
-      - uses: ./.github/actions/build-s9pk
-        with:
-          arch: arm
+          arch: arches
           s9pk-build-key: ${{ secrets.S9PK_BUILD_KEY }}
 
       - name: Checksums

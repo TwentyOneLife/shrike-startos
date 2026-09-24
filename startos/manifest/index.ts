@@ -18,7 +18,7 @@ export const manifest = setupManifest({
     },
     long: {
       en_US:
-        "Shrike is a desktop wallet for the Bitcoin Blake2b chain, a fork of Sparrow. This package runs it on your server and serves it to your browser, connected to your own Shulcrum Electrum server.\nThis is an unofficial package, built by TwentyOne.Life rather than by the wallet's authors. Shrike is developed at shrikewallet.com; its name and its bird are theirs, used with permission. Report problems with the package here, not to them.\nThe wallet and its keys live on the server, so it is a hot wallet. Use watch-only wallets here and sign on a hardware or offline device unless you accept that.",
+        "Shrike is a desktop wallet for the Bitcoin Blake2b chain, a fork of Sparrow. This package runs it on your server and serves it to your browser, connected to your own Shulcrum Electrum server.\nThis is an unofficial package, built by TwentyOne.Life rather than by the wallet's authors. Shrike is developed at shrikewallet.com; its name and its bird are theirs, used with permission. Report problems with the package here, not to them.\nHow much this holds is your choice. A watch-only wallet paired with an airgapped signer keeps the keys off the server entirely; putting a seed in it makes it a hot wallet on an always-on machine. The interface login and the wallet's own password protect it either way.",
     },
   },
   volumes: ['main', 'userdir'],

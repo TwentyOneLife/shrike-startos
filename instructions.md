@@ -9,10 +9,22 @@ wallet. If something here misbehaves, it is far more likely to be the packaging 
 report it to the package and not to them. The Shrike name and bird are theirs, used with permission,
 which is not the same as their endorsement.
 
-## Read this first: the keys are on your server
+## Read this first: how much this holds is your choice
 
-A wallet with its keys on an always-on machine is a hot wallet. Whoever reaches this interface
-controls the money in it.
+A wallet with its keys on an always-on machine is a hot wallet, and this package can be one. It does
+not have to be. Three things sit between the interface and your money, and they stack:
+
+1. **The interface login.** Nobody reaches the wallet at all without it.
+2. **The wallet's own password.** Set when you create the wallet, and separate from the login. It
+   protects the wallet file, including in a backup that leaves this machine.
+3. **An external signing device.** Use a watch-only wallet here with an airgapped signer such as a
+   SeedSigner, and the keys are never on this server at all. The wallet shows balances and builds
+   transactions; the device signs them. At that point this is not a hot wallet, because there is
+   nothing hot in it.
+
+Take none of those and it is a hot wallet in the plainest sense: whoever reaches the interface
+controls the money. Take the third and reaching the interface gets someone your transaction history,
+which is worth protecting but is not your coins.
 
 - **Use a watch-only wallet here** and sign transactions on a hardware wallet or an offline
   computer. This package cannot use a USB hardware wallet directly, because nothing is passed
