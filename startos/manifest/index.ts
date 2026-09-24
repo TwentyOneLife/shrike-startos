@@ -32,7 +32,7 @@ export const manifest = setupManifest({
           workdir: '.',
         },
       },
-      arch: ['x86_64'],
+      arch: ['x86_64', 'aarch64'],
     },
   },
   hardwareAcceleration: true,

@@ -34,7 +34,10 @@ follows from it.
    screen at a fixed rate: measured on their own image with a browser watching, 73.7 percent of a
    CPU core against 13.1 percent with that off. Neither costs anything when nobody is watching. A
    fair trade for a desktop, a poor one for a wallet on a server.
-4. **Build for arm64.** The image is x86_64 only; the architecture mapping is already in place.
+4. **Build for arm64: done.** Both architectures are built and released. The wallet publishes an
+   arm64 package of its own, and the base image is a multi-architecture index, so nothing needed
+   cross-compiling. The arm64 image is assembled under emulation, costing about a fifth over the
+   native build. What no build proves is that it runs: that waits on arm64 hardware.
 5. **Prove a wallet syncs end to end**, including across the chain's activation height. This waits
    on a server with a full index, which is the one thing here that cannot be hurried. Everything
    short of it is proven: the wallet reaches the configured server, completes a protocol 1.8

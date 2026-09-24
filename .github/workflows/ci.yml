@@ -62,6 +62,31 @@ jobs:
           path: '*.s9pk'
           if-no-files-found: error
 
+  build-s9pk-arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+
+      # A separate job rather than a matrix over the x86 one, because a matrix renames the check and
+      # branch protection requires it by name. Not required either, so an emulated build cannot
+      # hold up a typo fix, though it turned out to cost about a fifth over the native one rather
+      # than the multiple that assumption was guarding against. The release builds both, so a
+      # broken arm64 build cannot ship unnoticed.
+      - uses: ./.github/actions/build-s9pk
+        with:
+          arch: arm
+          s9pk-build-key: ${{ secrets.S9PK_BUILD_KEY }}
+          allow-throwaway-key: ${{ github.event_name == 'pull_request' }}
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: s9pk-unsigned-ci-arm64
+          path: '*.s9pk'
+          if-no-files-found: error
+
   image-hardening:
     runs-on: ubuntu-latest
     steps:

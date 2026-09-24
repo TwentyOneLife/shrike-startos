@@ -81,6 +81,15 @@ runs:
         tar2sqfs --version | head -1
         command -v mksquashfs
 
+    - name: Emulate the target architecture, when it is not the runner's
+      if: inputs.arch != 'x86'
+      # A hosted runner is x86_64. Building an aarch64 image on it means running aarch64 binaries
+      # under emulation, which needs binfmt handlers the runner does not have by default. Nothing
+      # here cross-compiles: the image is assembled by apt, so every package's maintainer scripts
+      # run, and they run emulated. Measured rather than assumed: 6m23 against 5m17 for the native
+      # build, so emulation costs about a fifth, not the multiple it is usually worth dreading.
+      uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+
     - name: Use a buildx driver that can export an image
       shell: bash
       # start-cli asks buildx for a docker format export of the service image. The runner's default
