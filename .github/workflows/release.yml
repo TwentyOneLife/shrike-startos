@@ -59,7 +59,7 @@ jobs:
           s9pk-build-key: ${{ secrets.S9PK_BUILD_KEY }}
 
       - name: Checksums
-        run: sha256sum *.s9pk > SHA256SUMS
+        run: sha256sum ./*.s9pk > SHA256SUMS
 
       - name: Sign the checksums with the release key
         env:
@@ -86,7 +86,8 @@ jobs:
         # people the check is noise.
         run: |
           set -euo pipefail
-          export GNUPGHOME="$(mktemp -d)"
+          GNUPGHOME="$(mktemp -d)"
+          export GNUPGHOME
           chmod 700 "$GNUPGHOME"
           gpg --batch --quiet --import keys/twentyonelife-release.asc
           gpg --batch --verify SHA256SUMS.asc SHA256SUMS

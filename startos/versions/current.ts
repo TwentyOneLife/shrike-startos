@@ -9,10 +9,10 @@ export const current = VersionInfo.of({
   // Flavored, as Shulcrum's package is: this is a wallet for one chain, and the flavor is what
   // stops it satisfying anything that wanted Sparrow on Bitcoin. The number tracks Shrike's
   // upstream version; the revision after it is this package's own.
-  version: '#blake:2.5.5:15',
+  version: '#blake:2.5.5:16',
   releaseNotes: {
     en_US:
-      'Says more accurately what this holds. Calling it a hot wallet was only true of one way to use it: paired with an airgapped signer such as a SeedSigner the keys are never on the server at all, and the interface login and the wallet password protect it either way. Also fixes a release build that failed when it tried to build both architectures.',
+      'Fixes the release build so it can publish both architectures. No change to the wallet.',
   },
   migrations: {
     up: async ({ effects }) => {},

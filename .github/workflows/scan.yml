@@ -74,6 +74,21 @@ jobs:
           fi
           echo "every pinned action resolves"
 
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Check the workflows, and the shell inside them
+        # ShellCheck alone reads the .sh files and stops there, which left the shell embedded in
+        # workflow `run:` blocks unchecked. That is where a release broke: a glob written for one
+        # .s9pk was handed two once both architectures were built. actionlint validates the workflow
+        # syntax and runs ShellCheck over every run block, and found two more issues in the release
+        # workflow the moment it was pointed at them.
+        run: |
+          docker run --rm -v "$PWD":/repo -w /repo \
+            rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+          echo "workflows clean"
+
   shellcheck:
     runs-on: ubuntu-latest
     steps:

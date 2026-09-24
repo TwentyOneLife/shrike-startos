@@ -165,4 +165,13 @@ runs:
       shell: bash
       # The root signature hash is the package's identity to a registry. Printing it here means a
       # change of signing key shows up in the build log rather than at install time.
-      run: start-cli s9pk inspect *.s9pk commitment
+      #
+      # One at a time: `inspect` takes a single package, and a build of every architecture leaves
+      # more than one behind, so a bare glob passes it two and it exits. That is what broke the
+      # first release that built both.
+      run: |
+        set -euo pipefail
+        for pkg in *.s9pk; do
+          echo "== $pkg"
+          start-cli s9pk inspect "$pkg" commitment
+        done
