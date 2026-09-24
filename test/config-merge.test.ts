@@ -113,8 +113,18 @@ for (const network of ['mainnet', 'testnet4'] as Network[]) {
 test('the two networks resolve to different files', () => {
   const m = shrikeConfig('mainnet')
   const t = shrikeConfig('testnet4')
+  // This is the only guard on the path, because the tests above override it with withPath and the
+  // install that would really exercise it does not run in CI. Assert the whole ending, not that the
+  // word appears somewhere in it.
+  assert.ok(
+    String(m.path).endsWith('.shrike/config'),
+    `mainnet path was ${m.path}`,
+  )
+  assert.ok(
+    String(t.path).endsWith('.shrike/testnet4/config'),
+    `testnet4 path was ${t.path}`,
+  )
   assert.notEqual(m.path, t.path)
-  assert.ok(String(t.path).includes('testnet4'), `testnet4 path was ${t.path}`)
 })
 
 test('a network with no server still gets the settings that keep it quiet', async () => {

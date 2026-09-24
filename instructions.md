@@ -78,9 +78,11 @@ and the package sets that at every start, in the configuration belonging to the 
 running. If you change the server inside the wallet, the next restart of this service sets it back.
 
 **This package also decides, on every network, that the wallet talks to nobody but its own server.**
-The public block explorer, the exchange rate source and the update check are all off and cannot be
-turned on from inside the wallet. That is deliberate: a wallet on an always-on server that quietly
-fetched fee rates from a public site would be telling a stranger when it is in use.
+The public block explorer, the exchange rate source and the update check are all off. They are set
+the same way the server is: change one inside the wallet and it holds until the next restart of this
+service, which sets it back. That is deliberate rather than an oversight, because a wallet on an
+always-on server that quietly fetched fee rates from a public site would be telling a stranger when
+it is in use.
 
 The "Electrum Server" health check opens the same connection the wallet uses, so it tells you
 whether the wallet can see the chain, not merely what it is configured to use.
