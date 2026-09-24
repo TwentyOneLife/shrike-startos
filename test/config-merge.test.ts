@@ -13,6 +13,10 @@
 // The fixture is a real wallet-authored config from the test node with the addresses and credentials
 // removed. Its value is precisely the keys it does not have.
 //
+// What these do not cover: whether main.ts sends this payload, and sends it unconditionally. That
+// needs a running package, so it is verified on the node rather than here. Do not read a green run
+// as proof the package is configured correctly.
+//
 // Run: npm test
 
 import { test } from 'node:test'
@@ -30,6 +34,17 @@ const FIXTURE = path.join(
   'test/fixtures/wallet-authored-config.json',
 )
 const SERVER = 'tcp://electrum.example:50011'
+
+// What main.ts asserts on every start, whatever the network. These are the settings that decide
+// whether the wallet talks to anyone but its own server; the fixture carries Sparrow's stock values
+// for them, which do reach out.
+const PRIVACY = {
+  blockExplorer: 'http://none',
+  feeRatesSource: 'ELECTRUM_SERVER',
+  exchangeSource: 'NONE',
+  checkNewVersions: false,
+  useProxy: false,
+} as const
 
 type Network = 'mainnet' | 'testnet4'
 
@@ -68,15 +83,17 @@ for (const network of ['mainnet', 'testnet4'] as Network[]) {
 
       const helper = shrikeConfig(network).withPath(file)
       await helper.merge(effects, {
+        ...PRIVACY,
         serverType: 'ELECTRUM_SERVER',
         electrumServer: SERVER,
-        useProxy: false,
       })
 
       const after = JSON.parse(fs.readFileSync(file, 'utf-8'))
       assert.equal(after.serverType, 'ELECTRUM_SERVER')
       assert.equal(after.electrumServer, SERVER)
-      assert.equal(after.useProxy, false)
+      for (const [k, v] of Object.entries(PRIVACY)) {
+        assert.equal(after[k], v, `${k} was not asserted on ${network}`)
+      }
 
       // Everything the wallet had set must survive. If this fails the package is quietly reverting
       // the user's settings on every start, including the ones that keep it from reaching the
@@ -98,4 +115,32 @@ test('the two networks resolve to different files', () => {
   const t = shrikeConfig('testnet4')
   assert.notEqual(m.path, t.path)
   assert.ok(String(t.path).includes('testnet4'), `testnet4 path was ${t.path}`)
+})
+
+test('a network with no server still gets the settings that keep it quiet', async () => {
+  // Testnet4 with no address configured. The wallet has nowhere to connect, which is expected and
+  // stated in the interface; what must not happen is that it spends that time fetching fee rates
+  // from a public mempool site because the defaults never reached this file.
+  const { dir, file } = stage('testnet4')
+  try {
+    const before = JSON.parse(fs.readFileSync(file, 'utf-8'))
+    assert.equal(before.blockExplorer, 'https://mempool.guide')
+    assert.equal(before.feeRatesSource, 'MEMPOOL_GUIDE')
+    assert.equal(before.checkNewVersions, true)
+
+    await shrikeConfig('testnet4').withPath(file).merge(effects, PRIVACY)
+
+    const after = JSON.parse(fs.readFileSync(file, 'utf-8'))
+    for (const [k, v] of Object.entries(PRIVACY)) {
+      assert.equal(after[k], v, `${k} was not asserted without a server`)
+    }
+    // Its own server setting is left alone rather than replaced with an empty one.
+    assert.equal(after.serverType, before.serverType)
+    assert.ok(
+      !('electrumServer' in after),
+      'no server should have been invented',
+    )
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true })
+  }
 })

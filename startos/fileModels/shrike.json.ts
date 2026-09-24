@@ -4,9 +4,28 @@ import { sdk } from '../sdk'
 // Only the fields this package sets. Shrike's config carries many more and the user may change
 // them in the wallet, so this is merged into the file rather than written over it.
 const shape = z.object({
-  serverType: z.literal('ELECTRUM_SERVER'),
+  // A plain string, not the literal this package writes. `merge` validates the merged object, so a
+  // literal here rejects the value already in the file: on a network with no server configured
+  // nothing overrides `BITCOIN_CORE`, validation fails, and startup dies. Same shape of mistake as
+  // the required `proxyServer` below, found by the test that covers the no-server case. The shape
+  // has to describe what the file may hold, not only what we write into it.
+  serverType: z.string().optional(),
   electrumServer: z.string().optional(),
   useProxy: z.boolean(),
+  // The settings that decide whether this wallet talks to anyone but its own server. They are in
+  // the defaults file, which only ever reached mainnet: a config the wallet created for another
+  // network carries Sparrow's stock values instead, and those reach out. The testnet4 config on the
+  // test node had `blockExplorer: https://mempool.guide`, `feeRatesSource: MEMPOOL_GUIDE` and
+  // `checkNewVersions: true`, so a wallet nobody had touched was fetching fee rates and update
+  // checks over the clearnet. Seeding cannot fix that, because the wallet writes the file first.
+  // Asserted at every start instead, on whichever network is running.
+  //
+  // Declared here so the merge payload typechecks. The SDK writes an undeclared field through
+  // anyway, measured, so this is a type-level requirement rather than a runtime one.
+  blockExplorer: z.string().optional(),
+  feeRatesSource: z.string().optional(),
+  exchangeSource: z.string().optional(),
+  checkNewVersions: z.boolean().optional(),
   // Optional, and it has to be. Shrike serialises its config with Gson, which omits null fields, so
   // a config the wallet wrote itself may not carry this key at all: the one on the test node had 41
   // fields and no `proxyServer`. This package never sets it, but a required field here makes
