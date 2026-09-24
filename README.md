@@ -1,9 +1,14 @@
 # shrike-startos
 
-[Shrike](https://shrikewallet.com/), a wallet for the Bitcoin Blake2b chain, packaged for StartOS as
-a desktop you reach from a browser. The wallet itself is developed at
-[`privkeyio/shrike`](https://github.com/privkeyio/shrike); this repository packages it and is not
-affiliated with or endorsed by its authors.
+**An unofficial package** of [Shrike](https://shrikewallet.com/), a wallet for the Bitcoin Blake2b
+chain, for StartOS: a desktop you reach from a browser.
+
+Unofficial means what it says. The wallet is developed at
+[`privkeyio/shrike`](https://github.com/privkeyio/shrike) and this package is built by
+TwentyOne.Life, not by them. **Report problems with the package here, not to them.** The Shrike name
+and the bird used as this package's icon are theirs, used with their permission
+([privkeyio/shrike#67](https://github.com/privkeyio/shrike/issues/67)); permission to use a mark is
+not endorsement of what carries it.
 
 Forked from [`remcoros/sparrow-webtop-startos`](https://github.com/remcoros/sparrow-webtop-startos),
 which does the same for Sparrow on Bitcoin. Their work is what made this a small change rather than
@@ -63,6 +68,12 @@ make                  # the .s9pk
 docker build .        # the image on its own
 ```
 
-## License
+## License and attribution
 
 GPL-3.0, as the package this was forked from. Shrike itself is Apache-2.0.
+
+`icon.png` is the Shrike mark, copyright its authors, used with permission granted in
+[privkeyio/shrike#67](https://github.com/privkeyio/shrike/issues/67) on two conditions: that it is
+attributed, and that this package is labelled unofficial. Both are met here, in the manifest, in the
+instructions shown at install time, and above. Apache-2.0 covers the code and grants no rights to a
+mark, which is why permission was asked for rather than assumed.
