@@ -86,8 +86,9 @@ runs:
       # A hosted runner is x86_64. Building an aarch64 image on it means running aarch64 binaries
       # under emulation, which needs binfmt handlers the runner does not have by default. Nothing
       # here cross-compiles: the image is assembled by apt, so every package's maintainer scripts
-      # run, and they run emulated. Measured rather than assumed: 6m23 against 5m17 for the native
-      # build, so emulation costs about a fifth, not the multiple it is usually worth dreading.
+      # run, and they run emulated. Two builds so far took 6m23 and 9m15, against about 5m for the
+      # native one. So somewhere between a fifth and twice as long, and two samples is not enough to
+      # say where in that range it sits.
       uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
 
     - name: Use a buildx driver that can export an image
