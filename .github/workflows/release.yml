@@ -22,10 +22,11 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Formatting and types
+      - name: Formatting, types and tests
         run: |
-          npx prettier --check startos
+          npx prettier --check startos test
           npx tsc --noEmit
+          npm test
 
       - name: The wallet's signing key is the one we vendored
         run: |

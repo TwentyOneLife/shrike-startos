@@ -6,7 +6,7 @@ import {
   uiPort,
 } from './utils'
 import { store } from './fileModels/store.yaml'
-import { shrike } from './fileModels/shrike.json'
+import { shrikeConfig } from './fileModels/shrike.json'
 import { i18n } from './i18n'
 
 export const main = sdk.setupMain(async ({ effects }) => {
@@ -89,23 +89,40 @@ export const main = sdk.setupMain(async ({ effects }) => {
         ? `tcp://${shulcrumAddress}`
         : null
 
-  if (server) {
-    await subcontainer.exec([
-      'sh',
-      '-c',
-      'test -f /config/.shrike/config || { mkdir -p /config/.shrike && cp /defaults/.shrike/config /config/.shrike/config; }; chown -R 1000:1000 /config/.shrike',
-    ])
-    await shrike.merge(effects, {
-      serverType: 'ELECTRUM_SERVER',
-      electrumServer: server,
-      // Never proxied. Shulcrum answers on a private address on this box, and Tor's SOCKS port
-      // refuses private addresses: measured on a node, the same address answered directly and
-      // failed through the proxy in the same breath. Nothing else this wallet does goes out, since
-      // the block explorer and the exchange rate source are both off, so a proxy here could only
-      // ever break the one connection that matters.
-      useProxy: false,
-    })
-  }
+  await subcontainer.exec([
+    'sh',
+    '-c',
+    // Seed whichever config this network uses, from the same defaults, then chown the tree.
+    // The wallet creates the network directory itself on first run, so this has to cope with it
+    // existing or not.
+    `d=${network === 'mainnet' ? '/config/.shrike' : `/config/.shrike/${network}`}; ` +
+      'mkdir -p "$d"; test -f "$d/config" || cp /defaults/.shrike/config "$d/config"; ' +
+      'chown -R 1000:1000 /config/.shrike',
+  ])
+
+  // Unconditional, because these are the settings that decide whether the wallet talks to anyone
+  // but its own server, and they must hold on a network that has no server configured just as much
+  // as on one that does. Seeding cannot carry them: the wallet writes its own config for a new
+  // network before this ever runs, with Sparrow's stock values, which fetch fee rates from a public
+  // mempool site and check for updates. Observed on the test node's testnet4 config, which nobody
+  // had edited. The user cannot turn these back on, and that is the deliberate shape of a packaged
+  // wallet whose whole design is that the session reaches one server and nothing else.
+  await shrikeConfig(network).merge(effects, {
+    blockExplorer: 'http://none',
+    feeRatesSource: 'ELECTRUM_SERVER',
+    exchangeSource: 'NONE',
+    checkNewVersions: false,
+    // Never proxied. Shulcrum answers on a private address on this box, and Tor's SOCKS port
+    // refuses private addresses: measured on a node, the same address answered directly and
+    // failed through the proxy in the same breath. With the settings above, nothing else this
+    // wallet does goes out, so a proxy here could only ever break the one connection that matters.
+    useProxy: false,
+    // Only when there is one. On testnet4 without an address, writing `ELECTRUM_SERVER` with no
+    // server would replace the wallet's own idea of where to look with nothing at all.
+    ...(server
+      ? { serverType: 'ELECTRUM_SERVER' as const, electrumServer: server }
+      : {}),
+  })
 
   // The X11 applications in this image do not render when both the outer compositor and Labwc use
   // their software Wayland paths. Force Software Rendering therefore takes precedence over the

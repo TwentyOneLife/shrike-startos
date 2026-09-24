@@ -24,10 +24,17 @@ jobs:
         run: npm ci
 
       - name: Formatting
-        run: npx prettier --check startos
+        run: npx prettier --check startos test
 
       - name: Types
         run: npx tsc --noEmit
+
+      - name: Tests
+        # The config merge, against a config the wallet itself wrote. Two shipped-or-nearly-shipped
+        # defects came from that file, and neither was visible to a typecheck: the server written to
+        # the wrong network's config, and a required field the wallet omits making the merge throw at
+        # startup. Both are reproduced here by reverting the fix, so this is a test that can fail.
+        run: npm test
 
       - name: The wallet's signing key is the one we vendored
         # The image verifies Shrike's release against this key. If the file ever changes, that is a

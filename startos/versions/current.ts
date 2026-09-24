@@ -9,10 +9,10 @@ export const current = VersionInfo.of({
   // Flavored, as Shulcrum's package is: this is a wallet for one chain, and the flavor is what
   // stops it satisfying anything that wanted Sparrow on Bitcoin. The number tracks Shrike's
   // upstream version; the revision after it is this package's own.
-  version: '#blake:2.5.5:17',
+  version: '#blake:2.5.5:18',
   releaseNotes: {
     en_US:
-      'Adds a network setting, so the wallet can run on testnet4 as well as mainnet. On mainnet nothing changes and the wallet still arrives connected to Shulcrum. On testnet4 no package serves this chain yet, so you supply a server address or the wallet starts without one. Wallets are kept separately per network, so switching does not lose anything.',
+      "On testnet4, the server address you set is now written into testnet4's own configuration, which is the file the wallet reads there, so the wallet arrives pointed at it. Before this it went into the configuration mainnet reads, and a wallet set to testnet4 started on the wallet's built-in defaults and reported a connection error. If you ran 2.5.5:17 on testnet4, that address was also left in your mainnet configuration; mainnet takes its server from Shulcrum at every start, so it corrects itself the next time you run mainnet with Shulcrum running. If Shulcrum is not running, set the server in the wallet yourself.\n\nAlso closes an outbound connection on any network other than mainnet. This package turns off the public block explorer, the exchange rate source and the update check, but those settings only ever reached mainnet's configuration: on testnet4 the wallet used its own stock values and fetched fee rates from a public mempool site over the clearnet. They are now applied on whichever network is running, the same way the server address is: if you change one inside the wallet, the next restart of this service sets it back.",
   },
   migrations: {
     up: async ({ effects }) => {},
