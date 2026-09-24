@@ -2,8 +2,9 @@
   "name": "shrike-startos",
   "scripts": {
     "build": "rm -rf ./javascript && ncc build startos/index.ts -o ./javascript",
-    "prettier": "prettier --write startos",
-    "check": "tsc --noEmit"
+    "prettier": "prettier --write startos test",
+    "check": "tsc --noEmit",
+    "test": "ncc build test/config-merge.test.ts -o build/test -m && node --test build/test/index.js"
   },
   "dependencies": {
     "@start9labs/start-sdk": "2.0.9",

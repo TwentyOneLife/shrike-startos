@@ -7,3 +7,5 @@ docker-images
 node_modules
 javascript/*
 ncc-cache
+# Bundled test output.
+build/

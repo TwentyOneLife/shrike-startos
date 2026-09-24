@@ -7,7 +7,12 @@ const shape = z.object({
   serverType: z.literal('ELECTRUM_SERVER'),
   electrumServer: z.string().optional(),
   useProxy: z.boolean(),
-  proxyServer: z.string(),
+  // Optional, and it has to be. Shrike serialises its config with Gson, which omits null fields, so
+  // a config the wallet wrote itself may not carry this key at all: the one on the test node had 41
+  // fields and no `proxyServer`. This package never sets it, but a required field here makes
+  // `merge` validate the merged object, throw, and take the whole startup with it. Measured against
+  // that file: required threw, optional merged and kept all 41 fields.
+  proxyServer: z.string().optional(),
 })
 
 export type ShrikeConfigType = z.infer<typeof shape>
