@@ -57,11 +57,30 @@ Shulcrum on this server. That path needs no package at all.
 2. **Open the interface.** Shrike starts by itself, already pointed at Shulcrum.
 3. **Create or import a wallet.** File, then New Wallet or Import Wallet.
 
+## Choosing a network
+
+Settings, then Actions, then Network. Mainnet is the default and needs nothing from you.
+
+**Testnet4** exists here because the software can be exercised on it, not because anything serves it
+for you. No StartOS package indexes this chain's testnet4, so you supply an address in the same
+action, as `host:port`. Leave it empty and the wallet starts with no server, which is a wallet that
+works and shows nothing.
+
+The wallet keeps its wallets, its settings and its own server choice **separately per network**, so
+switching loses nothing and switching back finds everything where you left it. What it does mean is
+that a network you have just switched to has no wallets in it yet, and an empty wallet list after a
+switch is that rather than a loss.
+
 ## What is connected
 
 Shrike is configured to use Shulcrum on this server as its Electrum server, over the local bridge,
-and the package sets that at every start. If you change the server inside the wallet, the next
-restart of this service sets it back.
+and the package sets that at every start, in the configuration belonging to the network you are
+running. If you change the server inside the wallet, the next restart of this service sets it back.
+
+**This package also decides, on every network, that the wallet talks to nobody but its own server.**
+The public block explorer, the exchange rate source and the update check are all off and cannot be
+turned on from inside the wallet. That is deliberate: a wallet on an always-on server that quietly
+fetched fee rates from a public site would be telling a stranger when it is in use.
 
 The "Electrum Server" health check opens the same connection the wallet uses, so it tells you
 whether the wallet can see the chain, not merely what it is configured to use.
