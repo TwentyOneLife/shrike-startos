@@ -47,6 +47,31 @@ export const inputSpec = InputSpec.of({
     ),
     default: true,
   }),
+  network: Value.select({
+    name: 'Network',
+    description:
+      'Which chain the wallet runs on. Shrike runs one network per process, so changing this restarts the service and the wallet reopens on the other chain. Wallets are kept separately per network and are not lost by switching.',
+    default: 'mainnet',
+    values: {
+      mainnet: 'Mainnet',
+      testnet4: 'Testnet4',
+    },
+  }),
+  testnet4Server: Value.text({
+    name: 'Testnet4 Electrum server',
+    description:
+      'Only used on testnet4, as host:port. On mainnet the wallet connects to Shulcrum on this server and this is ignored. No package serves testnet4 for this chain yet, so if you select that network you have to say where a server is. Leave it empty and the wallet will start on testnet4 with no server configured.',
+    required: false,
+    default: null,
+    placeholder: '192.168.1.10:50011',
+    inputmode: 'url',
+    patterns: [
+      {
+        regex: '^$|^[A-Za-z0-9.:_-]+:[0-9]{1,5}$',
+        description: 'A host and port, for example 192.168.1.10:50011',
+      },
+    ],
+  }),
   forceSoftwareRendering: Value.toggle({
     name: i18n('Force Software Rendering'),
     description: i18n(
@@ -97,6 +122,8 @@ async function readSettings(effects: T.Effects): Promise<PartialInputSpec> {
     username: settings.username,
     password: settings.password,
     enableWayland: settings.enableWayland,
+    network: settings.network,
+    testnet4Server: settings.testnet4Server || null,
     forceSoftwareRendering: settings.forceSoftwareRendering,
   }
 }
@@ -107,6 +134,8 @@ async function writeSettings(effects: T.Effects, input: InputSpec) {
     username: input.username,
     password: input.password,
     enableWayland: input.enableWayland,
+    network: input.network,
+    testnet4Server: input.testnet4Server ?? '',
     forceSoftwareRendering: input.forceSoftwareRendering,
   })
 }

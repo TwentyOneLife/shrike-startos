@@ -7,8 +7,16 @@ const shape = z.object({
   password: z.string().optional(),
   enableWayland: z.boolean().catch(true),
   forceSoftwareRendering: z.boolean().catch(false),
-  // No server choice: this wallet reads one chain, and Shulcrum is the only server that serves it.
-  // No proxy choice either; see main.ts for why one could only break the connection.
+  // The chain this wallet runs on. Shrike is one network per process, so this is decided before
+  // it starts rather than inside it, and changing it restarts the service.
+  network: z
+    .union([z.literal('mainnet'), z.literal('testnet4')])
+    .catch('mainnet'),
+  // Only consulted on testnet4. On mainnet the server is Shulcrum on this box and there is nothing
+  // to choose; on testnet4 no package serves this chain yet, so an address has to come from
+  // somewhere and the only honest place is the person running it.
+  testnet4Server: z.string().catch(''),
+  // No proxy choice; see main.ts for why one could only break the connection.
 })
 
 export type StoreType = z.infer<typeof shape>
@@ -37,5 +45,7 @@ export const createDefaultStore = async (effects: T.Effects) => {
     username: 'shrike',
     enableWayland: true,
     forceSoftwareRendering: false,
+    network: 'mainnet',
+    testnet4Server: '',
   })
 }
