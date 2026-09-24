@@ -1,9 +1,14 @@
 import { sdk } from './sdk'
 import {
+  isOnionAddress,
   shulcrumHostId,
   shulcrumPackageId,
   shulcrumPort,
+  torPackageId,
+  torSocksHostId,
+  torSocksPort,
   uiPort,
+  withScheme,
 } from './utils'
 import { store } from './fileModels/store.yaml'
 import { shrikeConfig } from './fileModels/shrike.json'
@@ -80,13 +85,18 @@ export const main = sdk.setupMain(async ({ effects }) => {
   // person running it supplies one or the wallet starts with none. Saying that plainly is better
   // than pointing a testnet4 wallet at a mainnet server, which fails in a way that looks like our
   // bug rather than a missing setting.
+  //
+  // The scheme is kept if the person supplied one. Shulcrum on the bridge is plaintext, so `tcp` is
+  // the default, but the same Shulcrum published over Tor answers TLS on another port, and its
+  // address is copied out of the StartOS interface page complete with `ssl://`. Throwing that away
+  // would hand back a failed handshake for a setting the user had got right.
   const server =
     network === 'testnet4'
       ? conf.testnet4Server
-        ? `tcp://${conf.testnet4Server}`
+        ? withScheme(conf.testnet4Server)
         : null
       : shulcrumAddress
-        ? `tcp://${shulcrumAddress}`
+        ? withScheme(shulcrumAddress)
         : null
 
   await subcontainer.exec([
@@ -107,16 +117,36 @@ export const main = sdk.setupMain(async ({ effects }) => {
   // mempool site and check for updates. Observed on the test node's testnet4 config, which nobody
   // had edited. The user cannot turn these back on, and that is the deliberate shape of a packaged
   // wallet whose whole design is that the session reaches one server and nothing else.
+  // A server published only as an onion cannot be reached without Tor, and one on the bridge cannot
+  // be reached through it: Tor's SOCKS port refuses private addresses, measured on a node where the
+  // same address answered directly and failed through the proxy in the same breath. So the proxy is
+  // not a preference to be asked about, it is a property of the address, and the address is already
+  // known here.
+  //
+  // Shrike's proxy setting is global rather than per server, which would matter if this wallet made
+  // any other outbound connection. It makes none: the settings above see to that. So the global
+  // switch has exactly one connection to affect, which is the one being decided.
+  const useTor = !!server && isOnionAddress(server)
+  const torSocks = useTor
+    ? await sdk.host
+        .getBridgeAddress(effects, {
+          packageId: torPackageId,
+          hostId: torSocksHostId,
+          internalPort: torSocksPort,
+          fallbackPort: torSocksPort,
+        })
+        .const()
+    : null
+
   await shrikeConfig(network).merge(effects, {
     blockExplorer: 'http://none',
     feeRatesSource: 'ELECTRUM_SERVER',
     exchangeSource: 'NONE',
     checkNewVersions: false,
-    // Never proxied. Shulcrum answers on a private address on this box, and Tor's SOCKS port
-    // refuses private addresses: measured on a node, the same address answered directly and
-    // failed through the proxy in the same breath. With the settings above, nothing else this
-    // wallet does goes out, so a proxy here could only ever break the one connection that matters.
-    useProxy: false,
+    // Only ever on for an onion, and only when there is a proxy to name. Turning it on without one
+    // would replace a connection that fails for a stated reason with one that fails for none.
+    useProxy: useTor && !!torSocks,
+    ...(torSocks ? { proxyServer: torSocks } : {}),
     // Only when there is one. On testnet4 without an address, writing `ELECTRUM_SERVER` with no
     // server would replace the wallet's own idea of where to look with nothing at all.
     ...(server

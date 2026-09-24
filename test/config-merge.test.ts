@@ -25,6 +25,7 @@ import * as fs from 'node:fs'
 import * as os from 'node:os'
 import * as path from 'node:path'
 import { shrikeConfig } from '../startos/fileModels/shrike.json'
+import { isOnionAddress, withScheme } from '../startos/utils'
 
 // Bundled with the package's own ncc before running, because every import in this codebase is
 // extensionless and node's type stripping will not resolve those. Bundling means no import.meta, so
@@ -153,4 +154,59 @@ test('a network with no server still gets the settings that keep it quiet', asyn
   } finally {
     fs.rmSync(dir, { recursive: true, force: true })
   }
+})
+
+// #42: whether to proxy is decided from the server address, so the decision is only as good as
+// this predicate. The cases below are the ones that would be wrong in a way nobody notices: a
+// bridge address sent through Tor fails, because Tor's SOCKS refuses private addresses, and an
+// onion sent direct fails because nothing can resolve it.
+test('an onion address is recognised, and a bridge address is not', () => {
+  const onions = [
+    'tcp://server.onion:50002',
+    'ssl://server.onion:50002',
+    'server.onion:50011',
+    'example.onion',
+    'EXAMPLE.ONION:50002', // the address may arrive in any case
+  ]
+  for (const a of onions) {
+    assert.equal(isOnionAddress(a), true, `should be onion: ${a}`)
+  }
+
+  const direct = [
+    'tcp://198.51.100.4:50001', // a server reached directly, the normal case
+    'tcp://electrum.example:50011',
+    'electrum.example:50002',
+    'tcp://192.0.2.7:50001',
+    // Not an onion: the label has to end the host, or a host merely containing the word would be
+    // sent down a circuit that cannot carry it.
+    'tcp://onion.example.com:50002',
+    'tcp://notanonion.example:50002',
+    '',
+  ]
+  for (const a of direct) {
+    assert.equal(isOnionAddress(a), false, `should not be onion: ${a}`)
+  }
+})
+
+// The scheme decides plaintext against TLS. A packaged Shulcrum on the bridge is plaintext; the same
+// Shulcrum over Tor answers TLS on another port, and its address is copied out of the StartOS
+// interface page with `ssl://` already on the front. Dropping that would fail the handshake for a
+// setting the user had got right.
+test('a supplied scheme is kept, and a bare address gets tcp', () => {
+  assert.equal(withScheme('198.51.100.4:50001'), 'tcp://198.51.100.4:50001')
+  assert.equal(
+    withScheme('electrum.example:50011'),
+    'tcp://electrum.example:50011',
+  )
+  assert.equal(
+    withScheme('tcp://electrum.example:50011'),
+    'tcp://electrum.example:50011',
+  )
+  assert.equal(
+    withScheme('ssl://server.onion:50002'),
+    'ssl://server.onion:50002',
+  )
+  // An onion over TLS must still be recognised as an onion once the scheme is on it, or it would be
+  // given the right scheme and no route.
+  assert.equal(isOnionAddress(withScheme('server.onion:50002')), true)
 })
