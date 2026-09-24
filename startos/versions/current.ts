@@ -9,10 +9,10 @@ export const current = VersionInfo.of({
   // Flavored, as Shulcrum's package is: this is a wallet for one chain, and the flavor is what
   // stops it satisfying anything that wanted Sparrow on Bitcoin. The number tracks Shrike's
   // upstream version; the revision after it is this package's own.
-  version: '#blake:2.5.5:13',
+  version: '#blake:2.5.5:14',
   releaseNotes: {
     en_US:
-      "Labelled unofficial, which it always was. This package is built by TwentyOne.Life and not by the people who write the wallet, and problems with it should be reported to the package rather than to them. The Shrike name and bird are used with the authors' permission, on the condition that the package says both of these things plainly.",
+      'Builds for arm64 as well as x86_64, so this runs on a Raspberry Pi class server rather than only on a PC. The wallet publishes an arm64 package of its own, which this verifies against the same key by the same fingerprint.',
   },
   migrations: {
     up: async ({ effects }) => {},

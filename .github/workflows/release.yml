@@ -49,6 +49,14 @@ jobs:
         with:
           s9pk-build-key: ${{ secrets.S9PK_BUILD_KEY }}
 
+      # Both architectures, because the manifest declares both. Emulated and slow; a release is
+      # where that is worth paying, and a release missing an architecture it advertises is worse
+      # than a release that took an hour.
+      - uses: ./.github/actions/build-s9pk
+        with:
+          arch: arm
+          s9pk-build-key: ${{ secrets.S9PK_BUILD_KEY }}
+
       - name: Checksums
         run: sha256sum *.s9pk > SHA256SUMS
 
