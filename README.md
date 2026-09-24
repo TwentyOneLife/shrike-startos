@@ -17,9 +17,12 @@ a project.
 ## What this is for
 
 The ordinary way to use Shrike is on your own computer, pointed at a Shulcrum server. This package
-is for reaching a wallet through the server's own address instead, including over Tor. The cost is
-that the wallet and its keys live on an always-on machine, so read `instructions.md` before putting
-money in it.
+is for reaching a wallet through the server's own address instead, including over Tor.
+
+How much that costs you is a choice. Run a watch-only wallet here with an airgapped signer such as a
+SeedSigner and the keys are never on the server: the wallet builds transactions, the device signs
+them. Put a seed in it and it is a hot wallet on an always-on machine. `instructions.md` sets out
+what protects what, and is worth reading before either.
 
 ## How it differs from the package it was forked from
 
