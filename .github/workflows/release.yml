@@ -49,9 +49,9 @@ jobs:
         with:
           s9pk-build-key: ${{ secrets.S9PK_BUILD_KEY }}
 
-      # Both architectures, because the manifest declares both. Emulated and slow; a release is
-      # where that is worth paying, and a release missing an architecture it advertises is worse
-      # than a release that took an hour.
+      # Both architectures, because the manifest declares both. The arm64 one is emulated, which
+      # costs about a fifth over the native build, and a release missing an architecture it
+      # advertises would be worse than one that took a few minutes longer.
       - uses: ./.github/actions/build-s9pk
         with:
           arch: arm

@@ -71,9 +71,10 @@ jobs:
           node-version: 22
 
       # A separate job rather than a matrix over the x86 one, because a matrix renames the check and
-      # branch protection requires it by name. Not a required check either: this is an emulated
-      # build and it takes as long as it takes, which should not hold up a typo fix. The release
-      # builds both, so a broken arm64 build cannot ship unnoticed.
+      # branch protection requires it by name. Not required either, so an emulated build cannot
+      # hold up a typo fix, though it turned out to cost about a fifth over the native one rather
+      # than the multiple that assumption was guarding against. The release builds both, so a
+      # broken arm64 build cannot ship unnoticed.
       - uses: ./.github/actions/build-s9pk
         with:
           arch: arm
