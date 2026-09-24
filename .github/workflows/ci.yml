@@ -72,9 +72,9 @@ jobs:
 
       # A separate job rather than a matrix over the x86 one, because a matrix renames the check and
       # branch protection requires it by name. Not required either, so an emulated build cannot
-      # hold up a typo fix, though it turned out to cost about a fifth over the native one rather
-      # than the multiple that assumption was guarding against. The release builds both, so a
-      # broken arm64 build cannot ship unnoticed.
+      # hold up a typo fix: observed at 6m23 and 9m15 against about 5m native, which is a wide
+      # enough spread not to plan around. The release builds both, so a broken arm64 build cannot
+      # ship unnoticed.
       - uses: ./.github/actions/build-s9pk
         with:
           arch: arm
