@@ -63,12 +63,12 @@ export const inputSpec = InputSpec.of({
       'Only used on testnet4, as host:port. On mainnet the wallet connects to Shulcrum on this server and this is ignored. No package serves testnet4 for this chain yet, so if you select that network you have to say where a server is. Leave it empty and the wallet will start on testnet4 with no server configured.',
     required: false,
     default: null,
-    placeholder: '192.168.1.10:50011',
+    placeholder: 'electrum.example:50011',
     inputmode: 'url',
     patterns: [
       {
         regex: '^$|^[A-Za-z0-9.:_-]+:[0-9]{1,5}$',
-        description: 'A host and port, for example 192.168.1.10:50011',
+        description: 'A host and port, for example electrum.example:50011',
       },
     ],
   }),
