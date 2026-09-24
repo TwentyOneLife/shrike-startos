@@ -2,19 +2,23 @@ import { setupManifest } from '@start9labs/start-sdk'
 
 export const manifest = setupManifest({
   id: 'shrike',
-  title: 'Shrike',
+  // "Unofficial" in the title itself, not only in the description: this is the string StartOS shows
+  // in a list, and a condition of using the wallet's mark is that nobody reads a third-party build
+  // as one of theirs. Agreed with a Shrike collaborator, privkeyio/shrike#67, 2026-09-24.
+  title: 'Shrike (unofficial)',
   license: 'Apache-2.0',
   packageRepo: 'https://github.com/TwentyOneLife/shrike-startos',
   upstreamRepo: 'https://github.com/privkeyio/shrike',
-  marketingUrl: 'https://github.com/privkeyio/shrike',
+  marketingUrl: 'https://shrikewallet.com/',
   donationUrl: 'https://github.com/privkeyio/shrike',
   description: {
     short: {
-      en_US: 'Bitcoin Blake2b wallet in your browser',
+      en_US:
+        'Unofficial package of the Bitcoin Blake2b wallet, in your browser',
     },
     long: {
       en_US:
-        'Shrike is a desktop wallet for the Bitcoin Blake2b chain, a fork of Sparrow. This package runs it on your server and serves it to your browser, connected to your own Shulcrum Electrum server.\nThe wallet and its keys live on the server, so it is a hot wallet. Use watch-only wallets here and sign on a hardware or offline device unless you accept that.',
+        "Shrike is a desktop wallet for the Bitcoin Blake2b chain, a fork of Sparrow. This package runs it on your server and serves it to your browser, connected to your own Shulcrum Electrum server.\nThis is an unofficial package, built by TwentyOne.Life rather than by the wallet's authors. Shrike is developed at shrikewallet.com; its name and its bird are theirs, used with permission. Report problems with the package here, not to them.\nThe wallet and its keys live on the server, so it is a hot wallet. Use watch-only wallets here and sign on a hardware or offline device unless you accept that.",
     },
   },
   volumes: ['main', 'userdir'],

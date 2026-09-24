@@ -2,8 +2,12 @@
 
 Shrike is a wallet for the Bitcoin Blake2b chain, a fork of Sparrow, developed at
 <https://shrikewallet.com/>. This package runs it on your server and shows it in your browser,
-connected to your own Shulcrum server. It is packaged here by someone other than its authors, and
-is not endorsed by them.
+connected to your own Shulcrum server.
+
+**This is an unofficial package.** It is built by TwentyOne.Life, not by the people who write the
+wallet. If something here misbehaves, it is far more likely to be the packaging than the wallet, so
+report it to the package and not to them. The Shrike name and bird are theirs, used with permission,
+which is not the same as their endorsement.
 
 ## Read this first: the keys are on your server
 
