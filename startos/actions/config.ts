@@ -60,15 +60,16 @@ export const inputSpec = InputSpec.of({
   testnet4Server: Value.text({
     name: 'Testnet4 Electrum server',
     description:
-      'Only used on testnet4, as host:port. On mainnet the wallet connects to Shulcrum on this server and this is ignored. No package serves testnet4 for this chain yet, so if you select that network you have to say where a server is. Leave it empty and the wallet will start on testnet4 with no server configured.',
+      'Only used on testnet4, as host:port. On mainnet the wallet connects to Shulcrum on this server and this is ignored. No package serves testnet4 for this chain yet, so if you select that network you have to say where a server is. Leave it empty and the wallet will start on testnet4 with no server configured. An onion address works and is routed through Tor automatically; anything else is connected to directly. Prefix with ssl:// if the server serves TLS, which the onion address on a StartOS interface page does.',
     required: false,
     default: null,
     placeholder: 'electrum.example:50011',
     inputmode: 'url',
     patterns: [
       {
-        regex: '^$|^[A-Za-z0-9.:_-]+:[0-9]{1,5}$',
-        description: 'A host and port, for example electrum.example:50011',
+        regex: '^$|^(tcp://|ssl://)?[A-Za-z0-9.:_-]+:[0-9]{1,5}$',
+        description:
+          'A host and port, for example electrum.example:50011, optionally prefixed with tcp:// or ssl://',
       },
     ],
   }),

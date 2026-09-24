@@ -66,6 +66,11 @@ for you. No StartOS package indexes this chain's testnet4, so you supply an addr
 action, as `host:port`. Leave it empty and the wallet starts with no server, which is a wallet that
 works and shows nothing.
 
+**An onion address works.** If the server you give ends in `.onion`, the wallet is pointed through
+this server's Tor proxy automatically; anything else is connected to directly. That is decided from
+the address rather than offered as a setting, because it is a property of the address: an onion
+cannot be reached without Tor, and a server on this machine cannot be reached through it.
+
 The wallet keeps its wallets, its settings and its own server choice **separately per network**, so
 switching loses nothing and switching back finds everything where you left it. What it does mean is
 that a network you have just switched to has no wallets in it yet, and an empty wallet list after a
