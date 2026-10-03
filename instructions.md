@@ -64,6 +64,10 @@ codes in its window, which the signer reads off your screen. To read the signer'
 borrows the camera of the computer you are sitting at: press Scan in the wallet, your browser asks
 whether this page may use the camera, and the camera is released again when the scanner closes.
 
+- **The first scan may show a black picture.** The wallet stops waiting for a picture after a few
+  seconds, and answering the browser's question can take longer than that. Allow the camera, let
+  the browser remember the choice, close the scanner and press Scan again. From then on the browser
+  no longer asks and the picture appears at once.
 - **Use an ordinary browser on a secure address.** That is this service's `https` address on your
   local network with your server's root certificate trusted. Over plain `http` a browser offers no
   camera to any page, and the wallet reports "No cameras available".
@@ -73,9 +77,9 @@ whether this page may use the camera, and the camera is released again when the 
 - **Never hold a SeedQR or a seed phrase up to this camera.** What the camera sees is sent to the
   server. A public key or a signed transaction is meant to go there. A seed is not.
 
-Proven so far with a test camera showing a still code, in a Chromium browser. A SeedSigner in the
-hand, an animated code and Firefox are the next things to be confirmed; if one of them fails for
-you, that is worth a report.
+Proven with a test camera showing a still code in a Chromium browser, and with a real webcam in
+Firefox. A signed transaction scanned back from a signer in the hand is the next thing to be
+confirmed; if it fails for you, that is worth a report.
 
 ## Choosing a network
 

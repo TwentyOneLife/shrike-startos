@@ -93,6 +93,14 @@ contains the wallet and a window manager and nothing else.
 file import, and carrying a key in through the clipboard is untested. That gap stays open and the
 instructions must not imply otherwise.
 
+**A slow answer to the permission prompt leaves the first scan black.** The wallet's capture
+library gives up when no frame arrives within a few seconds of opening the device, and does not
+try again. Measured with the browser's grant delayed: 1.5 seconds, frames flow; 7 seconds,
+`Select timeout` and none. Seen on an installed package with a person answering the prompt.
+Closing the scanner and pressing Scan again works once the browser remembers the permission. The
+alternative, asking for the camera when the session connects, keeps the camera on for the whole
+session and was not taken. The timeout is the wallet's, so the lasting fix belongs there.
+
 **The base's condition may change again.** The image is pinned by digest and the test above fails
 if a bump breaks this.
 
