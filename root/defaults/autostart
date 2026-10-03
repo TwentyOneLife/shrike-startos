@@ -11,4 +11,10 @@ if [ -r /config/.shrike-network ]; then
   export SPARROW_NETWORK
 fi
 
-/opt/shrike/bin/Shrike
+# The wallet is the whole session. Closing its window ends it, and with no menu, terminal or
+# launcher there is nothing left on the desktop to start it again, so it is started again here.
+# The pause keeps a wallet that cannot start from spinning.
+while true; do
+  /opt/shrike/bin/Shrike
+  sleep 2
+done
