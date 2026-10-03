@@ -22,9 +22,13 @@ pass() { echo "  ok: $1"; }
 cleanup() { docker rm -f "$NAME" >/dev/null 2>&1 || true; }
 trap cleanup EXIT
 
+# Started the way a second start looks on a host that refuses device nodes: no mknod, and the empty
+# file the first start left at /dev/video0 already in place. That is the condition under which the
+# wallet once lost its camera, and a plain `docker run` never produces it.
 echo "Starting $IMAGE"
-docker run -d --rm --name "$NAME" --shm-size=1g \
-  -e CUSTOM_USER="$USER_NAME" -e PASSWORD="$PASS" "$IMAGE" >/dev/null
+docker run -d --rm --name "$NAME" --shm-size=1g --cap-drop=MKNOD \
+  -e CUSTOM_USER="$USER_NAME" -e PASSWORD="$PASS" \
+  --entrypoint sh "$IMAGE" -c 'touch /dev/video0 && exec /usr/local/bin/docker_entrypoint.sh' >/dev/null
 
 # The interface is served by nginx, which comes up well before the desktop session does. Waiting on
 # it rather than sleeping a fixed time, so a slow runner does not produce a false failure.
@@ -99,6 +103,32 @@ case "$line" in
   *"8-15 fps"*) ;; *) fail "the framerate ceiling is not 8-15: $line" ;;
 esac
 [ "$failures" -eq "$before" ] && pass "audio off, gamepads off, fixed 1280x800, 8-15 fps"
+
+echo "The wallet has a camera on a start that is not the first"
+before=$failures
+# Read from the wallet process itself. The camera is a library loaded into it, so the environment
+# the container was given says nothing; what the process has mapped does.
+i=0
+pid=""
+while [ "$i" -lt 60 ]; do
+  pid=$(docker exec "$NAME" sh -c 'pgrep -f /opt/shrike/bin/Shrike | head -1' 2>/dev/null || true)
+  [ -n "$pid" ] && break
+  i=$((i + 1))
+  sleep 2
+done
+if [ -z "$pid" ]; then
+  fail "the wallet never started"
+else
+  docker exec -u abc "$NAME" sh -c "grep -q selkies_v4l2_interposer /proc/$pid/maps" 2>/dev/null ||
+    fail "the wallet process does not carry the camera library"
+fi
+# The same block of the base image that loads the library also tells the server to accept frames,
+# and the image asks for the camera only while the scanner is open.
+docker exec "$NAME" sh -c 'grep -qx true /run/s6/container_environment/SELKIES_WEBCAM_ENABLED' 2>/dev/null ||
+  fail "the server was not told to accept a camera"
+docker exec "$NAME" sh -c 'grep -qx demand /run/s6/container_environment/SELKIES_WEBCAM_ON_START' 2>/dev/null ||
+  fail "the camera is not requested on demand"
+[ "$failures" -eq "$before" ] && pass "camera library loaded in the wallet, server accepting it on demand"
 
 echo
 if [ "$failures" -eq 0 ]; then

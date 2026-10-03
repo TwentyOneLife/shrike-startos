@@ -11,6 +11,13 @@ for leftover in proot-apps proot proot-bwrap jq ncat pversion; do
   rm -f "/config/.local/bin/$leftover"
 done
 
+# The base image switches the camera on only if /dev/video0 is not there yet, and where it may not
+# create a device node it leaves an empty file in its place. /dev can outlive a restart of the
+# service, so that file would make every start after the first skip the camera altogether.
+if [ -f /dev/video0 ]; then
+  rm -f /dev/video0
+fi
+
 # always overwrite autostart in case we change it
 if [ "${PIXELFLUX_WAYLAND}" = "true" ]; then
   mkdir -p /config/.config/labwc
