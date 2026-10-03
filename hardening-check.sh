@@ -111,7 +111,8 @@ before=$failures
 i=0
 pid=""
 while [ "$i" -lt 60 ]; do
-  pid=$(docker exec "$NAME" sh -c 'pgrep -f /opt/shrike/bin/Shrike | head -1' 2>/dev/null || true)
+  # By name, not by command line: a match on the command line also finds the shell running this.
+  pid=$(docker exec "$NAME" pgrep -x Shrike 2>/dev/null | head -1 || true)
   [ -n "$pid" ] && break
   i=$((i + 1))
   sleep 2
