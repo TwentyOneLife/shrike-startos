@@ -216,6 +216,10 @@ ENV \
   SELKIES_UI_SIDEBAR_SHOW_GAMEPADS=false \
   SELKIES_GAMEPAD_ENABLED="false|locked" \
   NO_GAMEPAD=true \
+  # The camera is what reads a QR code from an airgapped signer. On demand, so the browser is asked
+  # for it only while the wallet has its scanner open and lets go when the scanner closes, rather
+  # than for the length of the session or after a toggle nobody knows to look for.
+  SELKIES_WEBCAM_ON_START=demand \
   PIXELFLUX_WAYLAND=true \
   NO_FULL=1 \
   AUTO_GPU=true \

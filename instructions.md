@@ -28,8 +28,8 @@ which is worth protecting but is not your coins.
 
 - **Use a watch-only wallet here** and sign transactions on a hardware wallet or an offline
   computer. This package cannot use a USB hardware wallet directly, because nothing is passed
-  through from the server. Moving an unsigned transaction out and a signed one back in is not yet a
-  tested path in this package, so treat it as unproven rather than routine.
+  through from the server. An airgapped signer that speaks in QR codes works through your browser's
+  camera; see "Signing with a QR code" below.
 - **Reach it over your local network, or over Tor.** Both work, and the wallet has been used over a
   Tor address in Tor Browser on its default settings. Expect it to feel slower there: the stream
   falls back to sending images rather than video, because Tor Browser withholds the interface that
@@ -56,6 +56,30 @@ Shulcrum on this server. That path needs no package at all.
 1. **Set the login** in Settings, under Actions. The interface refuses connections without it.
 2. **Open the interface.** Shrike starts by itself, already pointed at Shulcrum.
 3. **Create or import a wallet.** File, then New Wallet or Import Wallet.
+
+## Signing with a QR code
+
+An airgapped signer such as a SeedSigner shows QR codes and reads them. The wallet shows its own
+codes in its window, which the signer reads off your screen. To read the signer's codes the wallet
+borrows the camera of the computer you are sitting at: press Scan in the wallet, your browser asks
+whether this page may use the camera, and the camera is released again when the scanner closes.
+
+- **The first scan may show a black picture.** The wallet stops waiting for a picture after a few
+  seconds, and answering the browser's question can take longer than that. Allow the camera, let
+  the browser remember the choice, close the scanner and press Scan again. From then on the browser
+  no longer asks and the picture appears at once.
+- **Use an ordinary browser on a secure address.** That is this service's `https` address on your
+  local network with your server's root certificate trusted. Over plain `http` a browser offers no
+  camera to any page, and the wallet reports "No cameras available".
+- **Tor Browser cannot do this.** It withholds the camera from every page at every security level,
+  so over Tor the wallet can show codes but not read them. Do the scanning step from the local
+  network.
+- **Never hold a SeedQR or a seed phrase up to this camera.** What the camera sees is sent to the
+  server. A public key or a signed transaction is meant to go there. A seed is not.
+
+Proven with a test camera showing a still code in a Chromium browser, and with a real webcam in
+Firefox. A signed transaction scanned back from a signer in the hand is the next thing to be
+confirmed; if it fails for you, that is worth a report.
 
 ## Choosing a network
 
@@ -103,5 +127,6 @@ needs changing while you wait.
 ## Limitations
 
 - No USB devices, so hardware wallets cannot be plugged into the server.
+- No scanning of QR codes in Tor Browser, which withholds the camera.
 - One user at a time.
 - The clipboard between your computer and the wallet depends on what your browser allows.

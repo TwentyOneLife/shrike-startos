@@ -52,7 +52,8 @@ follows from it.
 
   Signing with an airgapped device is a different matter and **is** the intended path: the wallet
   draws a QR code on its own desktop and the stream carries it to the screen a signer is pointed at.
-  The return leg, getting a signed transaction back without a camera on the server, is designed but
-  not yet proven, and `instructions.md` says so rather than implying it is routine.
+  The return leg uses the camera of the computer the browser runs on, handed to the wallet only
+  while its scanner is open (`docs/design/camera.md`). Proven with a test camera, not yet with a
+  signer in the hand, and not possible in Tor Browser at all. `instructions.md` says all three.
 
 License: GPLv3. Shrike itself is Apache-2.0.

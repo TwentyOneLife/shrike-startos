@@ -21,8 +21,9 @@ is for reaching a wallet through the server's own address instead, including ove
 
 How much that costs you is a choice. Run a watch-only wallet here with an airgapped signer such as a
 SeedSigner and the keys are never on the server: the wallet builds transactions, the device signs
-them. Put a seed in it and it is a hot wallet on an always-on machine. `instructions.md` sets out
-what protects what, and is worth reading before either.
+them, and its QR codes are read through your browser's camera. Put a seed in it and it is a hot
+wallet on an always-on machine. `instructions.md` sets out what protects what, and is worth reading
+before either.
 
 ## How it differs from the package it was forked from
 
