@@ -131,6 +131,26 @@ docker exec "$NAME" sh -c 'grep -qx demand /run/s6/container_environment/SELKIES
   fail "the camera is not requested on demand"
 [ "$failures" -eq "$before" ] && pass "camera library loaded in the wallet, server accepting it on demand"
 
+echo "The wallet comes back after it is closed"
+before=$failures
+# Closing the main window quits the wallet. Ended here by signal, which the session cannot tell
+# from a quit, and it has to be running again under a new process id.
+if [ -n "$pid" ]; then
+  docker exec "$NAME" kill "$pid" 2>/dev/null || true
+  i=0
+  newpid=""
+  while [ "$i" -lt 30 ]; do
+    newpid=$(docker exec "$NAME" pgrep -x Shrike 2>/dev/null | head -1 || true)
+    [ -n "$newpid" ] && [ "$newpid" != "$pid" ] && break
+    i=$((i + 1))
+    sleep 2
+  done
+  { [ -n "$newpid" ] && [ "$newpid" != "$pid" ]; } || fail "the wallet did not start again"
+else
+  fail "no wallet process to close"
+fi
+[ "$failures" -eq "$before" ] && pass "closed and running again"
+
 echo
 if [ "$failures" -eq 0 ]; then
   echo "All hardening claims hold."
