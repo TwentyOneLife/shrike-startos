@@ -7,7 +7,7 @@
     "test": "ncc build test/config-merge.test.ts -o build/test -m && node --test build/test/index.js"
   },
   "dependencies": {
-    "@start9labs/start-sdk": "2.0.9",
+    "@start9labs/start-sdk": "3.1.1",
     "tor-startos": "github:Start9Labs/tor-startos#801070530453e73f143bfce2fcfb27988b962f03"
   },
   "devDependencies": {
