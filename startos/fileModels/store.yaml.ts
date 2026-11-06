@@ -33,7 +33,7 @@ export const createDefaultStore = async (effects: T.Effects) => {
   // check if the file exists (from previous installs or upgrades)
   const conf = await store.read().once()
   if (conf) {
-    // already exists — nothing to migrate (stale user/password keys will be preserved but ignored)
+    // already exists - nothing to migrate (stale user/password keys will be preserved but ignored)
     console.log('settings already exist, skipping default creation')
     return
   }
